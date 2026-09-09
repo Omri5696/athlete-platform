@@ -1,18 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { DEMO_ATHLETES, getDemoAthlete } from "@/lib/demo-data";
-import {
-  band,
-  bandLabel,
-  latest,
-  readinessScore,
-} from "@/lib/readiness";
+import { getAthlete } from "@/lib/athletes";
+import { band, bandLabel, latest, readinessScore } from "@/lib/readiness";
 import { Sparkline } from "@/components/Sparkline";
 import type { Checkin } from "@/lib/types";
 
-export function generateStaticParams() {
-  return DEMO_ATHLETES.map((a) => ({ id: a.id }));
-}
+export const dynamic = "force-dynamic";
 
 const SUBJ: {
   key: keyof Extract<Checkin, { submitted: true }>;
@@ -81,7 +74,7 @@ export default async function AthletePage({
   params,
 }: PageProps<"/athletes/[id]">) {
   const { id } = await params;
-  const athlete = getDemoAthlete(id);
+  const athlete = await getAthlete(id);
   if (!athlete) notFound();
 
   const score = readinessScore(athlete);

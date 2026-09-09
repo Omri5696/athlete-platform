@@ -1,6 +1,9 @@
-import { DEMO_ATHLETES } from "@/lib/demo-data";
+import { getRoster } from "@/lib/athletes";
 import { band, readinessScore } from "@/lib/readiness";
 import { AthleteCard } from "@/components/AthleteCard";
+
+// Reads live data per request (and will be per-coach once login exists).
+export const dynamic = "force-dynamic";
 
 const HE_DATE = new Intl.DateTimeFormat("he-IL", {
   weekday: "long",
@@ -8,14 +11,25 @@ const HE_DATE = new Intl.DateTimeFormat("he-IL", {
   month: "long",
 });
 
-export default function DashboardPage() {
-  const ranked = [...DEMO_ATHLETES]
+export default async function DashboardPage() {
+  const roster = await getRoster();
+  const ranked = roster
     .map((a) => ({ athlete: a, score: readinessScore(a) }))
     .sort((x, y) => x.score - y.score);
 
   const counts = { ready: 0, watch: 0, risk: 0 };
   for (const { score } of ranked) counts[band(score)]++;
   const submitted = ranked.filter((r) => r.athlete.checkin.submitted).length;
+
+  if (ranked.length === 0) {
+    return (
+      <main>
+        <div className="panel" style={{ textAlign: "center", padding: "40px 20px" }}>
+          עדיין אין מתאמנים במערכת. הוספת מתאמנים תגיע בשלב הבא.
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main>
@@ -54,8 +68,8 @@ export default function DashboardPage() {
       </div>
 
       <p className="foot-note">
-        פרוטוטייפ · כל הנתונים מומצאים. בגרסה החיה נתוני השינה, ה־HRV, דופק המנוחה
-        ו־Body Battery מגיעים אוטומטית מהשעון של כל מתאמן, וכל בוקר נשלח לו קישור
+        נתוני דמה מתוך מסד הנתונים. בגרסה החיה נתוני השינה, ה־HRV, דופק המנוחה
+        ו־Body Battery יגיעו אוטומטית מהשעון של כל מתאמן, וכל בוקר יישלח לו קישור
         אישי לצ׳ק-אין.
       </p>
     </main>

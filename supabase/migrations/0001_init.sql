@@ -81,14 +81,17 @@ alter table public.athletes       enable row level security;
 alter table public.daily_metrics  enable row level security;
 alter table public.daily_checkins enable row level security;
 
+drop policy if exists "coach reads own row" on public.coaches;
 create policy "coach reads own row"
   on public.coaches for select using (id = auth.uid());
 
+drop policy if exists "coach manages own athletes" on public.athletes;
 create policy "coach manages own athletes"
   on public.athletes for all
   using (coach_id = auth.uid())
   with check (coach_id = auth.uid());
 
+drop policy if exists "coach manages own athletes' metrics" on public.daily_metrics;
 create policy "coach manages own athletes' metrics"
   on public.daily_metrics for all
   using (exists (
@@ -100,6 +103,7 @@ create policy "coach manages own athletes' metrics"
     where a.id = daily_metrics.athlete_id and a.coach_id = auth.uid()
   ));
 
+drop policy if exists "coach manages own athletes' checkins" on public.daily_checkins;
 create policy "coach manages own athletes' checkins"
   on public.daily_checkins for all
   using (exists (
@@ -110,3 +114,16 @@ create policy "coach manages own athletes' checkins"
     select 1 from public.athletes a
     where a.id = daily_checkins.athlete_id and a.coach_id = auth.uid()
   ));
+
+-- ============================================================
+-- Grants
+-- "Automatically expose new tables" is off, so grant access explicitly.
+-- service_role = trusted backend (server actions, webhooks, cron); it also
+-- bypasses RLS. anon / authenticated stay ungranted until a feature needs
+-- them, and are gated by the RLS policies above when granted.
+-- ============================================================
+grant usage on schema public to service_role;
+grant all privileges on all tables in schema public to service_role;
+grant all privileges on all sequences in schema public to service_role;
+alter default privileges in schema public grant all on tables to service_role;
+alter default privileges in schema public grant all on sequences to service_role;

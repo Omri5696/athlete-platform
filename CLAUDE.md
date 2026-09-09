@@ -31,12 +31,22 @@
 
 ## מצב נוכחי
 
-השלב: **0.5 → 1**. שלושת המסכים בנויים ורצים על Vercel עם נתוני דמה
-(`src/lib/demo-data.ts`): דשבורד `/`, דף מתאמן `/athletes/[id]`, טופס `/checkin`.
-מערכת העיצוב ב־`src/app/globals.css` (טוקנים מהפרוטוטייפ ב־`docs/prototype/`).
-עדיין אין DB, אין אינטגרציות, הצ׳ק-אין לא נשמר.
+השלב: **1**. שלושת המסכים בנויים. Supabase מחובר: הדשבורד (`/`) ודף המתאמן
+(`/athletes/[id]`) קוראים מ-DB דרך `src/lib/athletes.ts`. הסכימה ב-
+`supabase/migrations/0001_init.sql`, seed ב-`scripts/seed.ts` (10 מתאמנים,
+המאמן: `omricohen5696@gmail.com`).
 
-הבא: Supabase (שלב 1). ראה `docs/PLAN.md`.
+עדיין אין login — קוראים עם `createAdminClient()` (service-role, עוקף RLS)
+בהנחת מאמן יחיד. `/checkin` הוא עדיין דמו שלא נשמר. נתוני השעון מוזנים כ-`source: 'manual'`.
+
+הבא: (1) 3 משתני סביבה ב-Vercel, (2) Supabase Auth למאמן. ראה `docs/PLAN.md`.
+
+## מפתחות וסביבה
+
+- `.env.local` (gitignored) — `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  (publishable), `SUPABASE_SERVICE_ROLE_KEY` (secret). תבנית ב-`.env.example`.
+- אותם 3 צריכים להיות מוגדרים גם ב-Vercel (Project Settings → Environment Variables).
+- להריץ סקריפט מקומי: `set -a && . ./.env.local && set +a && npx tsx scripts/<x>.ts`
 
 ## מוסכמות
 

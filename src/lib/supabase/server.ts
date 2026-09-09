@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 /**
  * Supabase client for Server Components, Route Handlers and Server Actions.
@@ -33,15 +34,14 @@ export async function createClient() {
 
 /**
  * Admin client — uses the service role key and BYPASSES Row Level Security.
- * Server-only. Use for trusted backend work (webhooks, cron, seeding),
- * never in response to an unauthenticated request without your own checks.
+ * Server-only. Use for trusted backend work (webhooks, cron, seeding,
+ * and — until coach login exists — the dashboard reads for the single coach).
+ * Never call in response to an unauthenticated request without your own checks.
  */
 export function createAdminClient() {
-  return createServerClient(
+  return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      cookies: { getAll: () => [], setAll: () => {} },
-    },
+    { auth: { persistSession: false, autoRefreshToken: false } },
   );
 }
