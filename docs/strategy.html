@@ -1,0 +1,617 @@
+<meta charset="utf-8" />
+<title>מוקד בוקר · אסטרטגיה</title>
+<meta name="description" content="אסטרטגיית מוצר למוקד בוקר — כלי טריאז׳ בוקר למאמנים עצמאיים: תזה, נוף תחרותי, roadmap ותמחור" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root {
+    --paper: #fbfaf7;
+    --surface: #ffffff;
+    --ink: #20242b;
+    --ink-2: #565c66;
+    --ink-3: #8a909b;
+    --rule: #e7e3db;
+    --rule-strong: #d8d3c8;
+    --accent: #33558c;
+    --accent-soft: #eaeef5;
+    --now: #1b7a4b;
+    --now-bg: #e7f2eb;
+    --next: #a9720f;
+    --next-bg: #f6eedd;
+    --later: #6f757e;
+    --later-bg: #edece9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #14161a;
+      --surface: #1b1e23;
+      --ink: #e8e9ec;
+      --ink-2: #a4a9b2;
+      --ink-3: #757b85;
+      --rule: #2c2f35;
+      --rule-strong: #3a3e45;
+      --accent: #83a7df;
+      --accent-soft: #1e2a3d;
+      --now: #4fbe85;
+      --now-bg: #12301f;
+      --next: #d9a445;
+      --next-bg: #33280f;
+      --later: #8a9099;
+      --later-bg: #23252a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #14161a;
+    --surface: #1b1e23;
+    --ink: #e8e9ec;
+    --ink-2: #a4a9b2;
+    --ink-3: #757b85;
+    --rule: #2c2f35;
+    --rule-strong: #3a3e45;
+    --accent: #83a7df;
+    --accent-soft: #1e2a3d;
+    --now: #4fbe85;
+    --now-bg: #12301f;
+    --next: #d9a445;
+    --next-bg: #33280f;
+    --later: #8a9099;
+    --later-bg: #23252a;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Assistant", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .doc {
+    direction: rtl;
+    max-width: 740px;
+    margin: 0 auto;
+    padding: 60px 26px 100px;
+  }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+
+  h1 {
+    font-family: "Frank Ruhl Libre", Georgia, serif;
+    font-weight: 900;
+    font-size: clamp(30px, 6vw, 44px);
+    line-height: 1.12;
+    letter-spacing: -0.005em;
+    text-wrap: balance;
+    margin: 0 0 18px;
+  }
+  h2 {
+    font-family: "Frank Ruhl Libre", Georgia, serif;
+    font-weight: 700;
+    font-size: 25px;
+    line-height: 1.2;
+    text-wrap: balance;
+    margin: 0 0 14px;
+  }
+  h3 {
+    font-family: "Assistant", sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    margin: 0 0 6px;
+  }
+  p { margin: 0 0 16px; }
+  a { color: var(--accent); }
+  strong { font-weight: 700; }
+
+  .dateline {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    color: var(--ink-3);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    align-items: center;
+    padding-bottom: 22px;
+    margin-bottom: 34px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .goal-chip {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 5px;
+    padding: 3px 9px;
+    letter-spacing: 0.02em;
+  }
+
+  .lede {
+    font-size: 19.5px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+  .lede .quiet { color: var(--ink-2); }
+
+  section { margin-top: 52px; }
+  section > .eyebrow { margin-bottom: 8px; }
+
+  /* tables */
+  .table-wrap { overflow-x: auto; margin: 8px 0 4px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+    line-height: 1.5;
+  }
+  th {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    text-align: right;
+    padding: 0 14px 8px 0;
+    border-bottom: 1px solid var(--rule-strong);
+    white-space: nowrap;
+  }
+  td {
+    padding: 11px 14px 11px 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  td:first-child { font-weight: 600; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  .price td:nth-child(2) {
+    font-family: "IBM Plex Mono", monospace;
+    white-space: nowrap;
+    color: var(--accent);
+  }
+
+  /* positioning figure */
+  figure {
+    margin: 20px 0 8px;
+    padding: 22px 18px 14px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+  }
+  figure svg { width: 100%; height: auto; display: block; color: var(--ink-2); }
+  figcaption {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.55;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+  }
+
+  /* roadmap */
+  .tier {
+    border-inline-start: 3px solid var(--tc);
+    padding: 2px 16px 2px;
+    margin: 0 0 8px;
+  }
+  .tier.now { --tc: var(--now); }
+  .tier.next { --tc: var(--next); }
+  .tier.later { --tc: var(--later); }
+  .tier-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tc);
+    margin: 16px 0 12px;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 4px 12px;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .tier .step:last-child { border-bottom: none; }
+  .step .n {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+    color: var(--ink-3);
+  }
+  .step .body { font-size: 15px; }
+  .step .body .why { color: var(--ink-2); font-size: 13.5px; display: block; margin-top: 2px; }
+  .effort {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    font-weight: 500;
+    border: 1px solid var(--rule-strong);
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: var(--ink-2);
+    align-self: center;
+  }
+  .effort.s { border-color: var(--now); color: var(--now); }
+  .effort.m { border-color: var(--next); color: var(--next); }
+  .effort.l { border-color: var(--later); color: var(--later); }
+
+  ol.gtm { margin: 6px 0; padding-inline-start: 22px; }
+  ol.gtm li { margin-bottom: 9px; padding-inline-start: 4px; }
+
+  .criteria {
+    list-style: none;
+    margin: 8px 0;
+    padding: 0;
+    display: grid;
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .criteria li {
+    background: var(--surface);
+    padding: 12px 16px;
+    font-size: 14.5px;
+  }
+  .criteria b {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 2px;
+    letter-spacing: 0.03em;
+  }
+
+  .decision {
+    margin-top: 52px;
+    background: var(--accent-soft);
+    border-radius: 14px;
+    padding: 26px 24px;
+  }
+  .decision .eyebrow { color: var(--accent); }
+  .decision h2 { margin-bottom: 8px; }
+  .decision p { margin: 0; font-size: 16.5px; }
+
+  hr.div {
+    border: none;
+    border-top: 1px solid var(--rule);
+    margin: 52px 0 0;
+  }
+  .foot {
+    margin-top: 22px;
+    font-size: 12.5px;
+    color: var(--ink-3);
+    font-family: "IBM Plex Mono", monospace;
+  }
+
+  @media (max-width: 560px) {
+    .doc { padding: 44px 18px 80px; }
+    .step { grid-template-columns: auto 1fr; }
+    .step .effort { grid-column: 2; justify-self: start; margin-top: 4px; }
+  }
+</style>
+
+<article class="doc">
+  <p class="eyebrow">אסטרטגיית מוצר</p>
+  <h1>מוקד בוקר: טריאז׳ בוקר למאמן העצמאי</h1>
+  <div class="dateline">
+    <span>10 בספטמבר 2026</span>
+    <span>·</span>
+    <span class="goal-chip">מטרה: כלי אישי + הכנסה צדדית</span>
+  </div>
+
+  <p class="lede">
+    מאמנים עצמאיים מנהלים עומס והתאוששות בראש, באקסל ובוואטסאפ. הם מפספסים את
+    הסימנים המוקדמים של over-reaching ומחלה כי המידע מפוזר.
+    <span class="quiet">
+      מוקד בוקר נותן להם דבר אחד: מבט של 30 שניות בבוקר — מי ירוק, צהוב או אדום,
+      למה, ומה המתאמן אמר הבוקר.
+    </span>
+  </p>
+
+  <section>
+    <p class="eyebrow">מיצוב</p>
+    <h2>איפה החור בשוק</h2>
+    <p>
+      הכלים הקיימים הם או מפלצות מוסדיות לפדרציות, או אפליקציות שמתחילות מהמכשיר של
+      המתאמן. הפינה של <strong>מאמן עצמאי + workflow־first</strong> תפוסה היום רק
+      על ידי אקסל וּוואטסאפ. זה הפתח.
+    </p>
+
+    <figure>
+      <svg viewBox="0 0 680 460" role="img"
+        aria-label="מפת מיצוב: ציר אופקי מפדרציות וקבוצות עד מאמן עצמאי; ציר אנכי ממוצא מהמכשיר עד מוצא מה-workflow של המאמן. Smartabase ו-AthleteMonitoring בצד המוסדי; HRV4Training ו-Whoop Teams בצד המכשיר; TrainingPeaks במרכז; אקסל ווואטסאפ בפינת המאמן־workflow; מוקד בוקר באותה פינה, עם חץ מהאקסל אליו.">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#33558c" />
+          </marker>
+        </defs>
+
+        <!-- quadrant frame -->
+        <rect x="150" y="52" width="420" height="330" fill="none" stroke="currentColor" stroke-opacity="0.16" />
+        <line x1="360" y1="52" x2="360" y2="382" stroke="currentColor" stroke-opacity="0.16" />
+        <line x1="150" y1="217" x2="570" y2="217" stroke="currentColor" stroke-opacity="0.16" />
+
+        <!-- axis labels -->
+        <text x="582" y="221" text-anchor="start" font-size="12.5" font-family="Assistant, sans-serif" fill="currentColor">מאמן עצמאי</text>
+        <text x="138" y="221" text-anchor="end" font-size="12.5" font-family="Assistant, sans-serif" fill="currentColor">פדרציות וקבוצות</text>
+        <text x="360" y="38" text-anchor="middle" font-size="12.5" font-family="Assistant, sans-serif" fill="currentColor">מוצא מהמכשיר</text>
+        <text x="360" y="410" text-anchor="middle" font-size="12.5" font-family="Assistant, sans-serif" fill="currentColor">מוצא מה־workflow של המאמן</text>
+
+        <!-- competitors: outline dots -->
+        <g font-family="Assistant, sans-serif" font-size="12.5" fill="currentColor">
+          <circle cx="215" cy="120" r="5" fill="none" stroke="currentColor" stroke-width="1.5" />
+          <text x="215" y="106" text-anchor="middle">Smartabase</text>
+
+          <circle cx="232" cy="270" r="5" fill="none" stroke="currentColor" stroke-width="1.5" />
+          <text x="232" y="291" text-anchor="middle">AthleteMonitoring</text>
+
+          <circle cx="472" cy="112" r="5" fill="none" stroke="currentColor" stroke-width="1.5" />
+          <text x="472" y="98" text-anchor="middle">HRV4Training</text>
+
+          <circle cx="372" cy="96" r="5" fill="none" stroke="currentColor" stroke-width="1.5" />
+          <text x="372" y="82" text-anchor="middle">Whoop Teams</text>
+
+          <circle cx="336" cy="200" r="5" fill="none" stroke="currentColor" stroke-width="1.5" />
+          <text x="326" y="186" text-anchor="middle">TrainingPeaks</text>
+
+          <circle cx="522" cy="332" r="5" fill="none" stroke="currentColor" stroke-width="1.5" />
+          <text x="522" y="353" text-anchor="middle">אקסל + וואטסאפ</text>
+        </g>
+
+        <!-- us -->
+        <line x1="522" y1="320" x2="518" y2="298" stroke="#33558c" stroke-width="1.4"
+          stroke-dasharray="3 3" marker-end="url(#ah)" />
+        <circle cx="516" cy="285" r="8" fill="#33558c" />
+        <circle cx="516" cy="285" r="14" fill="none" stroke="#33558c" stroke-width="1.5" />
+        <text x="516" y="264" text-anchor="middle" font-size="13.5" font-weight="700"
+          font-family="Assistant, sans-serif" fill="#33558c">מוקד בוקר</text>
+      </svg>
+      <figcaption>
+        כולם בנויים למישהו אחר: מוסדות עם מדען ספורט, או מתאמן עם מכשיר. הפינה של
+        המאמן העצמאי שרוצה workflow, לא עוד אפליקציה — ריקה. מוקד בוקר יושב שם,
+        במקום שבו היום יש רק גיליון אלקטרוני.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <p class="eyebrow">נוף תחרותי</p>
+    <h2>מי כבר עושה את זה</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>מי</th><th>מה הם</th><th>הפער שנשאר לנו</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>TrainingPeaks</td>
+            <td>תוכניות אימון — התקן של התעשייה</td>
+            <td>חלש בצ׳ק-אין סובייקטיבי ובטריאז׳ יומי. לא בעברית. plan־first, לא recovery־first</td>
+          </tr>
+          <tr>
+            <td>HRV4Training Pro</td>
+            <td>אפליקציית HRV למתאמן + דשבורד קבוצתי</td>
+            <td>מטריקה אחת. לא התמונה המלאה + צ׳ק-אין + roster</td>
+          </tr>
+          <tr>
+            <td>AthleteMonitoring · Smartabase · Kitman</td>
+            <td>פלטפורמות מוסדיות לפדרציות וקבוצות</td>
+            <td>יקר, מסורבל, דורש מדען ספורט. לא למאמן יחיד</td>
+          </tr>
+          <tr>
+            <td>Whoop Teams · Oura</td>
+            <td>נעול למכשיר, המידע שייך למתאמן</td>
+            <td>תצוגת המאמן משנית. המאמן לא בעל הבית</td>
+          </tr>
+          <tr>
+            <td>אקסל + TrainingPeaks + וואטסאפ</td>
+            <td>מה שקורה בפועל אצל המאמן העצמאי</td>
+            <td><strong>זה המתחרה האמיתי. את זה צריך לנצח.</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">הטריז</p>
+    <h2>למה דווקא זה יעבוד</h2>
+    <p>
+      עברית קודם. מאמן עצמאי קודם. הקמה של דקות — המתאמן מחבר שעון פעם אחת, או
+      שמקלידים מספרים. <strong>הקישור האישי לצ׳ק-אין הוא העוגן וגם החפיר:</strong>
+      נקודת מגע יומית עם המתאמן, דאטה לונגיטודינלית שנצברת, ומודל מוכנוּת שמתכוונן
+      לענף ולמתאמן הספציפי. ככל שהמאמן משתמש יותר, כך קשה לו יותר לעזוב.
+    </p>
+  </section>
+
+  <section>
+    <p class="eyebrow">קריטריון החלטה</p>
+    <h2>איך שוקלים כל פיצ׳ר</h2>
+    <ul class="criteria">
+      <li><b>טריאז׳ בוקר</b>עוזר למאמן לראות מהר יותר מי צריך תשומת לב?</li>
+      <li><b>לולאת הרגל</b>מחזק את נקודת המגע היומית של הצ׳ק-אין?</li>
+      <li><b>רץ לבד</b>עובד בלי שאתה מלווה אותו כל יום?</li>
+      <li><b>מאמץ</b>‏S / M / L — בכנות. עדיפות ל־S שנשלח השבוע</li>
+      <li><b>עלות משתנה</b>מוסיף עלות לכל מתאמן? אז זה שייך לתוכנית בתשלום</li>
+    </ul>
+  </section>
+
+  <section>
+    <p class="eyebrow">Roadmap</p>
+    <h2>מה לבנות, לפי הסדר</h2>
+
+    <div class="tier now">
+      <p class="tier-label">עכשיו · שהכלי יהיה שמיש למתאמנים שלך</p>
+      <div class="step">
+        <span class="n">01</span>
+        <span class="body">הזנת נתונים ידנית
+          <span class="why">טופס שבו אתה או המתאמן מקליד את מספרי הלילה. פותח שימוש יומי מיד.</span>
+        </span>
+        <span class="effort s">S</span>
+      </div>
+      <div class="step">
+        <span class="n">02</span>
+        <span class="body">הערת מאמן לכל מתאמן, לכל יום
+          <span class="why">"יום קל" · "תדחוף" · "תתקשר אליי". סוגר את הלולאה — זה הערך האמיתי.</span>
+        </span>
+        <span class="effort s">S</span>
+      </div>
+      <div class="step">
+        <span class="n">03</span>
+        <span class="body">ציון מוכנוּת שמראה "למה"
+          <span class="why">אילו רכיבים הורידו או העלו את הציון. בונה אמון.</span>
+        </span>
+        <span class="effort s">S</span>
+      </div>
+    </div>
+
+    <div class="tier next">
+      <p class="tier-label">הבא · לולאת ההרגל</p>
+      <div class="step">
+        <span class="n">04</span>
+        <span class="body">שליחת צ׳ק-אין יומית אוטומטית
+          <span class="why">מייל קודם (Resend + Vercel Cron 06:00), וואטסאפ אחר כך.</span>
+        </span>
+        <span class="effort m">M</span>
+      </div>
+      <div class="step">
+        <span class="n">05</span>
+        <span class="body">דף הצ׳ק-אין מראה למתאמן את המגמה שלו + הערת המאמן בחזרה
+          <span class="why">נותן למתאמן סיבה למלא, לא רק חובה.</span>
+        </span>
+        <span class="effort m">M</span>
+      </div>
+      <div class="step">
+        <span class="n">06</span>
+        <span class="body">דגל "X ימים אדומים ברצף" + מייל סיכום שבועי למאמן
+          <span class="why">המערכת פונה אליך, לא רק מחכה שתסתכל.</span>
+        </span>
+        <span class="effort m">M</span>
+      </div>
+    </div>
+
+    <div class="tier later">
+      <p class="tier-label">אחר כך · מכפיל הערך</p>
+      <div class="step">
+        <span class="n">07</span>
+        <span class="body">סנכרון שעונים אוטומטי דרך Terra — גרמין, Coros, Whoop, Oura, Apple
+          <span class="why">הקסם. אבל עלות לכל מתאמן + תמיכה. רק אחרי שיש מאמנים משלמים.</span>
+        </span>
+        <span class="effort l">L</span>
+      </div>
+      <div class="step">
+        <span class="n">08</span>
+        <span class="body">חיוב (Stripe) + הרשמה עצמית + מגבלות תוכנית
+          <span class="why">נדרש כדי לגבות בלי להיות בלולאה.</span>
+        </span>
+        <span class="effort m">M</span>
+      </div>
+      <div class="step">
+        <span class="n">09</span>
+        <span class="body">תצוגת עומס אימון — יחס acute:chronic
+          <span class="why">מאותם נתונים יומיים. מוסיף עומק בלי מקור מידע חדש.</span>
+        </span>
+        <span class="effort m">M</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">מודל עסקי</p>
+    <h2>תמחור</h2>
+    <div class="table-wrap">
+      <table class="price">
+        <thead>
+          <tr><th>תוכנית</th><th>מחיר</th><th>מה כולל</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>חינם</td><td>₪0</td><td>עד 3 מתאמנים, הזנה ידנית בלבד — אתה והתנסויות</td></tr>
+          <tr><td>Solo</td><td>₪79–99 / חו׳</td><td>עד 15 מתאמנים, צ׳ק-אין אוטומטי, הערות מאמן, מגמות</td></tr>
+          <tr><td>Pro</td><td>₪179–199 / חו׳</td><td>עד 40 מתאמנים, סנכרון שעונים, וואטסאפ, סיכום שבועי, ACWR</td></tr>
+          <tr><td>Club</td><td>לפי הצעה</td><td>‎40+ מתאמנים, רב-מאמנים</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:16px">
+      סנכרון השעונים הוא הפיתיון של התוכנית בתשלום כי יש לו עלות אמיתית
+      (Terra ‎~$0.5–2 למתאמן לחודש) — מתמחרים כך ש-15 מתאמנים מסונכרנים עדיין ברווח.
+      <br />
+      <strong>יעד: 30 מאמנים × ₪150 ממוצע = ₪4,500 לחודש.</strong> 100 מאמנים ≈ ₪15k.
+      עלות שולית כמעט אפס עד ש-Terra נכנס.
+    </p>
+  </section>
+
+  <section>
+    <p class="eyebrow">Go-to-market · בלי תקציב פרסום</p>
+    <h2>איך מגיעים ל-30 המאמנים הראשונים</h2>
+    <ol class="gtm">
+      <li>Dogfood עם המתאמנים שלך 4–6 שבועות. אוספים צילומי מסך וסיפורים.</li>
+      <li>קהילות מאמני ריצה וטריאתלון בישראל — קבוצות פייסבוק ווואטסאפ, ראשי מועדונים. פנייה ישירה; אתה אחד מהם.</li>
+      <li>תוכן "ככה נראה מוקד הבוקר שלי" — לינקדאין ואינסטגרם, מאמן־למאמן.</li>
+      <li>שיחת onboarding חינם ל-20 הראשונים → לומדים מהם + אוספים המלצות.</li>
+      <li>‎1–2 מאמנים ישראלים מוכרים כשותפי עיצוב או אפיליאייטים.</li>
+    </ol>
+  </section>
+
+  <section>
+    <p class="eyebrow">סיכונים</p>
+    <h2>מה יכול להשתבש, ואיך ה-lean מחזיק</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>סיכון</th><th>מענה</th></tr></thead>
+        <tbody>
+          <tr><td>תלות ועלות של Terra</td><td>דוחים; רק בתוכניות בתשלום; מגלגלים את העלות ללקוח</td></tr>
+          <tr><td>רגולציית מידע רפואי — חוק הגנת הפרטיות, GDPR</td><td>הסכמה בדף הצ׳ק-אין, מחיקה לפי בקשה, DPA מול Supabase, מינימום מידע</td></tr>
+          <tr><td>מדע המוכנוּת שנוי במחלוקת</td><td>ממסגרים כתמיכה בהחלטה ("מה השתנה"), לא "אל תתאמן". המאמן מכוונן משקלים</td></tr>
+          <tr><td>TrainingPeaks יוסיפו את זה</td><td>היתרונות: עברית, מחיר, מיקוד במאמן העצמאי, מערכת היחסים היומית. עסק לייף-סטייל לא צריך לנצח שוק</td></tr>
+          <tr><td>תשתעמם או תהיה עסוק</td><td>ה-roadmap מסודר כך שכל צעד שמיש בפני עצמו. אוטומציה לפני קנה מידה</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">אופציונליות</p>
+    <h2>איך מייצרים מזה עוד — מפה, לא משימה</h2>
+    <div class="table-wrap">
+      <table>
+        <tbody>
+          <tr><td>עוד שעונים</td><td>לא "כלי גרמין" אלא "כלי התאוששות". אותו קוד, TAM גדול יותר</td></tr>
+          <tr><td>עוד ענפים</td><td>ריצה → טריאתלון → אופניים → קרוספיט → אקדמיות נוער → טקטי וכוחות הצלה</td></tr>
+          <tr><td>עוד מה-workflow</td><td>ניטור → התאמת תוכנית → CRM אימון קליל (מתאמנים, תקשורת, חיוב)</td></tr>
+          <tr><td>קונים סמוכים</td><td>פיזיותרפיה (עומס בחזרה מפציעה), בריאות ארגונית, אתלטים ותיקים שמאמנים את עצמם</td></tr>
+          <tr><td>נכס דאטה</td><td>בנצ׳מרקים לונגיטודינליים אנונימיים ומוסכמים לפי ענף וגיל — רישוי מאוחר, או מנוע תוכן</td></tr>
+          <tr><td>מוצר-מודל</td><td>API של ציון מוכנוּת שכלים אחרים מטמיעים</td></tr>
+          <tr><td>גאוגרפי</td><td>עברית → אנגלית → ספרדית — שווקי סיבולת גדולים</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="decision">
+    <p class="eyebrow">ההחלטה עכשיו</p>
+    <h2>הזנת נתונים ידנית + הערת מאמן</h2>
+    <p>
+      שני פיצ׳רים קטנים (‏S + S). תוך שבוע יש לך כלי שאתה פותח כל בוקר עם המתאמנים
+      האמיתיים שלך. זה תנאי לכל השאר — בלי שימוש יומי משלך, אין למי למכור ואין מה
+      לכוונן.
+    </p>
+  </div>
+
+  <hr class="div" />
+  <p class="foot">
+    מקור אמת: <span dir="ltr">docs/STRATEGY.md</span> · מתוחזק על ידי סוכן ה-PM ·
+    מתעדכן כשהמציאות זזה
+  </p>
+</article>
