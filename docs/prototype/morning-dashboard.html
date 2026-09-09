@@ -1,0 +1,607 @@
+<meta charset="utf-8">
+<title>מוקד בוקר</title>
+<meta name="description" content="דשבורד מוכנוּת יומי למאמן — נתוני גרמין וצ׳ק-אין סובייקטיבי של המתאמנים">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&family=Heebo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --ground:#F4F6F9;
+    --surface:#FFFFFF;
+    --surface-2:#EDF0F6;
+    --border:#E0E4EC;
+    --border-strong:#CBD1DD;
+    --ink:#1B2029;
+    --ink-2:#586274;
+    --ink-3:#8B93A3;
+    --accent:#3B6EF6;
+    --accent-ink:#2A52CC;
+    --accent-bg:#E7EDFD;
+    --good:#1B9150; --good-bg:#E3F3E9;
+    --warn:#9C6B0C; --warn-bg:#F6EBD3;
+    --crit:#C33F35; --crit-bg:#F8E3E0;
+    --shadow:0 1px 2px rgba(16,24,40,.05), 0 8px 24px -12px rgba(16,24,40,.14);
+    --radius:14px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#0E1218;
+      --surface:#161C25;
+      --surface-2:#1E2733;
+      --border:#2A323F;
+      --border-strong:#3B4655;
+      --ink:#E7EBF1;
+      --ink-2:#9AA5B5;
+      --ink-3:#6A7585;
+      --accent:#5E88F9;
+      --accent-ink:#9DB7FB;
+      --accent-bg:#182444;
+      --good:#3EBE7A; --good-bg:#0F3223;
+      --warn:#E0A93E; --warn-bg:#332711;
+      --crit:#EC6A60; --crit-bg:#371B18;
+      --shadow:0 1px 2px rgba(0,0,0,.35), 0 10px 30px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0E1218;
+    --surface:#161C25;
+    --surface-2:#1E2733;
+    --border:#2A323F;
+    --border-strong:#3B4655;
+    --ink:#E7EBF1;
+    --ink-2:#9AA5B5;
+    --ink-3:#6A7585;
+    --accent:#5E88F9;
+    --accent-ink:#9DB7FB;
+    --accent-bg:#182444;
+    --good:#3EBE7A; --good-bg:#0F3223;
+    --warn:#E0A93E; --warn-bg:#332711;
+    --crit:#EC6A60; --crit-bg:#371B18;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 10px 30px -14px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);
+    font-family:"Heebo","Assistant",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    -webkit-font-smoothing:antialiased;}
+  .app{direction:rtl;max-width:1180px;margin:0 auto;padding:22px 20px 64px;}
+
+  h1,h2,h3{font-family:"Rubik","Heebo",sans-serif;margin:0;line-height:1.15;text-wrap:balance;}
+  .mono{font-family:"IBM Plex Mono","Heebo",monospace;font-variant-numeric:tabular-nums;}
+
+  /* ---- top bar ---- */
+  .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px;}
+  .brand{display:flex;flex-direction:column;gap:4px;}
+  .brand h1{font-size:23px;font-weight:700;letter-spacing:-.01em;}
+  .brand .sub{color:var(--ink-2);font-size:13.5px;}
+  .brand .sub b{color:var(--ink);font-weight:600;}
+  .topbar-right{display:flex;align-items:center;gap:8px;}
+
+  .tabs{display:inline-flex;background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:3px;gap:2px;}
+  .tabs button{font-family:"Rubik",sans-serif;font-size:13px;font-weight:600;color:var(--ink-2);
+    background:transparent;border:0;padding:7px 14px;border-radius:8px;cursor:pointer;transition:.15s;}
+  .tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow);}
+  .tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  .icon-btn{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--surface);
+    color:var(--ink-2);cursor:pointer;font-size:15px;display:grid;place-items:center;transition:.15s;}
+  .icon-btn:hover{color:var(--ink);border-color:var(--border-strong);}
+  .icon-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  /* ---- summary strip ---- */
+  .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;
+    position:relative;overflow:hidden;}
+  .stat::before{content:"";position:absolute;inset-inline-start:0;top:0;bottom:0;width:3px;background:var(--sc,var(--accent));}
+  .stat .k{font-size:12.5px;color:var(--ink-2);font-weight:500;margin-bottom:6px;}
+  .stat .v{font-size:30px;font-weight:600;line-height:1;letter-spacing:-.02em;}
+  .stat .v small{font-size:15px;color:var(--ink-3);font-weight:500;}
+  .stat.good{--sc:var(--good)} .stat.warn{--sc:var(--warn)} .stat.crit{--sc:var(--crit)}
+
+  .section-label{font-family:"Rubik",sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--ink-3);margin:0 2px 10px;display:flex;align-items:center;gap:10px;}
+  .section-label::after{content:"";flex:1;height:1px;background:var(--border);}
+
+  /* ---- athlete grid ---- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:13px;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:15px 16px 14px;
+    position:relative;overflow:hidden;cursor:pointer;transition:.15s;text-align:inherit;font:inherit;color:inherit;
+    display:flex;flex-direction:column;gap:12px;width:100%;}
+  .card::before{content:"";position:absolute;inset-inline-start:0;top:0;bottom:0;width:4px;background:var(--sc);}
+  .card:hover{border-color:var(--border-strong);transform:translateY(-1px);box-shadow:var(--shadow);}
+  .card:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .card.good{--sc:var(--good)} .card.warn{--sc:var(--warn)} .card.crit{--sc:var(--crit)}
+
+  .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .card-head .who{display:flex;flex-direction:column;gap:3px;min-width:0;}
+  .card-head .name{font-family:"Rubik",sans-serif;font-size:15.5px;font-weight:600;letter-spacing:-.01em;}
+  .card-head .sport{font-size:12px;color:var(--ink-3);}
+  .pill{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;font-family:"Rubik",sans-serif;
+    font-size:12px;font-weight:600;padding:4px 9px;border-radius:999px;background:var(--pb);color:var(--pc);}
+  .pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+  .pill.good{--pb:var(--good-bg);--pc:var(--good)}
+  .pill.warn{--pb:var(--warn-bg);--pc:var(--warn)}
+  .pill.crit{--pb:var(--crit-bg);--pc:var(--crit)}
+  .pill .score{font-family:"IBM Plex Mono",monospace;}
+
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .metric{display:flex;flex-direction:column;gap:2px;}
+  .metric .ml{font-size:10.5px;color:var(--ink-3);font-weight:500;letter-spacing:.01em;white-space:nowrap;}
+  .metric .mv{font-family:"IBM Plex Mono",monospace;font-size:16px;font-weight:500;letter-spacing:-.02em;}
+  .metric .md{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:500;}
+  .md.up{color:var(--good)} .md.down{color:var(--crit)} .md.flat{color:var(--ink-3)}
+  .md.up.bad{color:var(--crit)} .md.down.bad{color:var(--crit)}
+
+  .card-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:11px;border-top:1px solid var(--border);}
+  .checkin-badge{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--ink-2);}
+  .checkin-badge .mk{width:15px;height:15px;border-radius:5px;display:grid;place-items:center;font-size:10px;color:#fff;}
+  .checkin-badge.done .mk{background:var(--good)}
+  .checkin-badge.wait{color:var(--warn)}
+  .checkin-badge.wait .mk{background:var(--warn)}
+  .spark{flex:1;max-width:120px;}
+
+  /* ---- modal ---- */
+  .overlay{position:fixed;inset:0;background:rgba(10,14,20,.55);backdrop-filter:blur(2px);
+    display:grid;place-items:center;padding:20px;z-index:50;}
+  .overlay[hidden]{display:none!important}
+  .modal{direction:rtl;background:var(--surface);border:1px solid var(--border);border-radius:18px;
+    max-width:640px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow);}
+  .modal-head{position:sticky;top:0;background:var(--surface);border-bottom:1px solid var(--border);
+    padding:17px 20px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;z-index:1;}
+  .modal-head .name{font-family:"Rubik",sans-serif;font-size:19px;font-weight:700;}
+  .modal-head .sport{font-size:12.5px;color:var(--ink-3);margin-top:2px;}
+  .modal-body{padding:18px 20px 22px;display:flex;flex-direction:column;gap:20px;}
+
+  .trend-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .trend{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:12px 13px;}
+  .trend .tl{font-size:11.5px;color:var(--ink-2);font-weight:500;margin-bottom:3px;}
+  .trend .tv{font-family:"IBM Plex Mono",monospace;font-size:21px;font-weight:500;letter-spacing:-.02em;}
+  .trend .tv small{font-size:11px;color:var(--ink-3);}
+  .trend .tspark{margin-top:8px;}
+  .trend .spark{max-width:none;width:100%;height:52px;}
+  .trend .trange{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;
+    font-size:9.5px;color:var(--ink-3);margin-top:3px;}
+
+  .subj h3{font-family:"Rubik",sans-serif;font-size:13px;font-weight:600;letter-spacing:.03em;
+    text-transform:uppercase;color:var(--ink-3);margin-bottom:12px;}
+  .subj-rows{display:flex;flex-direction:column;gap:9px;}
+  .srow{display:grid;grid-template-columns:96px 1fr 30px;align-items:center;gap:12px;}
+  .srow .sl{font-size:12.5px;color:var(--ink-2);}
+  .srow .track{height:7px;border-radius:4px;background:var(--surface-2);overflow:hidden;display:flex;gap:2px;}
+  .srow .seg{flex:1;border-radius:2px;background:var(--border-strong);}
+  .srow .seg.on{background:var(--accent)}
+  .srow .seg.on.bad{background:var(--crit)}
+  .srow .seg.on.mid{background:var(--warn)}
+  .srow .sn{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-2);text-align:center;}
+  .note{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:11px 13px;
+    font-size:13px;line-height:1.55;color:var(--ink);}
+  .note .nl{font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:3px;}
+  .no-checkin{font-size:13px;color:var(--warn);background:var(--warn-bg);border-radius:10px;padding:12px 14px;font-weight:500;}
+
+  /* ---- form ---- */
+  .form-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:24px 24px 26px;max-width:560px;margin:0 auto;box-shadow:var(--shadow);}
+  .form-wrap h2{font-family:"Rubik",sans-serif;font-size:20px;font-weight:700;margin-bottom:4px;}
+  .form-wrap .fsub{color:var(--ink-2);font-size:13.5px;margin-bottom:22px;}
+  .field{margin-bottom:20px;}
+  .field > label{display:block;font-size:13.5px;font-weight:600;margin-bottom:9px;}
+  .field .hint{font-weight:400;color:var(--ink-3);font-size:12px;}
+  .scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+  .scale button{font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:500;padding:9px 0;
+    border:1px solid var(--border);background:var(--surface);color:var(--ink-2);border-radius:9px;cursor:pointer;transition:.12s;}
+  .scale button:hover{border-color:var(--border-strong);}
+  .scale button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .scale-ends{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-3);margin-top:6px;}
+  input[type="text"],input[type="number"],textarea{width:100%;font:inherit;font-size:13.5px;color:var(--ink);
+    background:var(--surface-2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;resize:vertical;}
+  input:focus,textarea:focus,.scale button:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .submit{width:100%;font-family:"Rubik",sans-serif;font-size:14.5px;font-weight:600;color:#fff;background:var(--accent);
+    border:0;border-radius:10px;padding:13px;cursor:pointer;transition:.15s;margin-top:4px;}
+  .submit:hover{background:var(--accent-ink);}
+  .submit:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .thanks{text-align:center;padding:30px 10px;}
+  .thanks .big{width:52px;height:52px;border-radius:50%;background:var(--good-bg);color:var(--good);
+    display:grid;place-items:center;font-size:26px;margin:0 auto 14px;}
+  .thanks h2{font-family:"Rubik",sans-serif;font-size:19px;margin-bottom:6px;}
+  .thanks p{color:var(--ink-2);font-size:13.5px;}
+  .demo-tag{display:inline-block;font-family:"Rubik",sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--accent-ink);background:var(--accent-bg);padding:3px 8px;border-radius:6px;}
+
+  .foot-note{margin-top:34px;text-align:center;font-size:12px;color:var(--ink-3);line-height:1.6;}
+
+  @media (max-width:720px){
+    .summary{grid-template-columns:1fr 1fr}
+    .trend-grid{grid-template-columns:1fr}
+    .brand h1{font-size:20px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="app">
+  <div class="topbar">
+    <div class="brand">
+      <h1>מוקד בוקר <span class="demo-tag">דמו</span></h1>
+      <div class="sub">יום שלישי, <b id="today-date">9 בספטמבר</b> · <b id="cohort-count">10</b> מתאמנים · נתוני גרמין עודכנו ב-05:40</div>
+    </div>
+    <div class="topbar-right">
+      <div class="tabs" role="tablist" aria-label="תצוגה">
+        <button role="tab" id="tab-coach" aria-selected="true" aria-controls="view-coach">מוקד בוקר</button>
+        <button role="tab" id="tab-checkin" aria-selected="false" aria-controls="view-checkin">צ׳ק-אין יומי</button>
+      </div>
+      <button class="icon-btn" id="theme-toggle" aria-label="החלפת מצב תצוגה">◐</button>
+    </div>
+  </div>
+
+  <!-- ============ COACH VIEW ============ -->
+  <section id="view-coach" role="tabpanel" aria-labelledby="tab-coach">
+    <div class="summary" id="summary"></div>
+    <div class="section-label">מסודר לפי דחיפוּת · הקש/י על מתאמן לפירוט</div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <!-- ============ CHECK-IN VIEW ============ -->
+  <section id="view-checkin" role="tabpanel" aria-labelledby="tab-checkin" hidden>
+    <div class="form-wrap" id="form-wrap"></div>
+  </section>
+
+  <p class="foot-note">
+    פרוטוטייפ · כל הנתונים מומצאים להמחשה. בגרסה החיה: נתוני השינה, ה-HRV, דופק המנוחה ו-Body Battery
+    מגיעים אוטומטית מהשעון של כל מתאמן, וכל בוקר נשלח לו קישור אישי לצ׳ק-אין הזה במייל.
+  </p>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-name"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const $ = s => document.querySelector(s);
+
+  /* ---------- demo data (7 days, index 6 = today) ---------- */
+  const ATHLETES = [
+    { name:"נועה שפירא", sport:"מרתון · שבוע עומס",
+      hrv:[64,61,62,58,55,50,47], rhr:[47,48,47,49,50,52,53],
+      sleepH:[7.3,7.0,6.6,6.3,6.0,5.6,5.9], bb:[80,74,70,58,50,42,38],
+      sleepScore:[83,79,73,67,61,54,57], load:[45,55,68,60,92,78,42],
+      checkin:{done:true, sleepQ:2, soreness:4, energy:2, mood:3, stress:4,
+        ate:"פסטה ברוטב שמנת, לחם, גלידה. ארוחת ערב מאוחרת (22:30).",
+        note:"רגליים כבדות מאוד מאז האינטרוולים של שלישי. קם עייף."} },
+
+    { name:"איתי רוזן", sport:"טריאתלון אולימפי",
+      hrv:[72,70,71,68,60,54,49], rhr:[44,44,45,45,48,51,54],
+      sleepH:[7.6,7.4,7.1,6.8,6.2,6.0,6.4], bb:[88,84,80,70,55,46,44],
+      sleepScore:[86,84,80,74,62,55,60], load:[50,60,55,70,40,30,20],
+      checkin:{done:false} },
+
+    { name:"דניאל אבוקסיס", sport:"HYROX",
+      hrv:[58,56,59,55,54,52,53], rhr:[52,53,52,53,54,55,55],
+      sleepH:[6.8,6.5,7.0,6.2,6.0,6.3,6.1], bb:[70,66,72,60,58,55,54],
+      sleepScore:[74,70,76,66,63,66,64], load:[60,70,65,80,75,85,70],
+      checkin:{done:false} },
+
+    { name:"רוני אזולאי", sport:"כוח + קרוספיט",
+      hrv:[61,60,62,59,58,57,58], rhr:[50,50,51,50,51,52,51],
+      sleepH:[7.0,6.8,7.2,6.6,6.9,6.7,6.8], bb:[74,72,76,66,70,68,67],
+      sleepScore:[76,74,78,70,73,71,72], load:[55,60,50,70,65,60,58],
+      checkin:{done:true, sleepQ:3, soreness:3, energy:3, mood:3, stress:3,
+        ate:"אורז, עוף, ירקות מוקפצים. חטיף חלבון אחרי האימון.",
+        note:"מרגיש בסדר, קצת עייפות בכתפיים מהלחיצות אתמול."} },
+
+    { name:"תומר גולן", sport:"כדורגל חצי-מקצועי",
+      hrv:[55,54,52,53,51,50,49], rhr:[53,53,54,54,55,55,56],
+      sleepH:[6.5,6.2,6.4,6.0,6.3,6.1,6.2], bb:[66,62,64,58,60,56,55],
+      sleepScore:[70,66,68,62,65,62,61], load:[75,80,70,85,80,90,82],
+      checkin:{done:true, sleepQ:2, soreness:3, energy:3, mood:4, stress:2,
+        ate:"פיצה אחרי המשחק, שתיתי מעט מים. בוקר: שייק בננה-שיבולת שועל.",
+        note:"מותש אבל בכיף. עומס דחיסה גבוה השבוע — משחק + 3 אימונים."} },
+
+    { name:"יעל ברקוביץ׳", sport:"10 ק״מ · שיפור שיא",
+      hrv:[66,67,66,68,69,68,70], rhr:[46,46,45,45,45,44,44],
+      sleepH:[7.8,8.0,7.6,7.9,8.1,7.8,8.0], bb:[90,92,88,91,93,90,94],
+      sleepScore:[88,90,86,89,91,89,92], load:[40,55,45,60,50,35,55],
+      checkin:{done:true, sleepQ:5, soreness:1, energy:5, mood:5, stress:1,
+        ate:"קוואקר עם פירות יער ואגוזים, קינואה עם סלמון בצהריים, מרק ירקות בערב.",
+        note:"מרגישה מצוין, קלילה. מוכנה לטמפו של היום."} },
+
+    { name:"מאיה קפלן", sport:"כוח · פאוורליפטינג",
+      hrv:[52,53,52,54,53,55,54], rhr:[49,48,49,48,48,47,48],
+      sleepH:[7.4,7.6,7.2,7.5,7.3,7.6,7.4], bb:[78,80,76,79,77,81,79],
+      sleepScore:[80,82,78,81,79,83,81], load:[50,45,55,40,50,45,48],
+      checkin:{done:true, sleepQ:4, soreness:2, energy:4, mood:4, stress:2,
+        ate:"ביצים, טוסט מלא, אבוקדו. עוף ואורז אחה״צ. גבינה לבנה בערב.",
+        note:"התאוששתי טוב מהסקוואט הכבד. מוכנה לדדליפט."} },
+
+    { name:"עומר דהן", sport:"אופני כביש · גראנפונדו",
+      hrv:[59,60,58,61,54,57,58], rhr:[48,47,48,47,50,48,47],
+      sleepH:[7.1,7.3,7.0,7.2,5.4,7.0,7.1], bb:[76,78,74,77,58,73,75],
+      sleepScore:[78,80,76,79,55,76,78], load:[60,70,55,75,80,50,60],
+      checkin:{done:true, sleepQ:3, soreness:2, energy:3, mood:3, stress:3,
+        ate:"פחמימות לפני הרכיבה, ג׳ל באמצע, פסטה אחרי. הרבה מים.",
+        note:"לילה גרוע אחד (הילד היה ער), אבל התאוששתי. מרגיש סביר."} },
+
+    { name:"שירה לוי", sport:"ריצת בסיס + יוגה",
+      hrv:[63,64,63,65,64,66,65], rhr:[47,47,46,47,46,46,46],
+      sleepH:[7.7,7.5,7.8,7.6,7.9,7.7,7.8], bb:[85,86,84,87,86,88,87],
+      sleepScore:[85,86,84,87,86,88,87], load:[35,40,30,45,35,40,38],
+      checkin:{done:true, sleepQ:4, soreness:1, energy:4, mood:4, stress:2,
+        ate:"דייסת שיבולת שועל, סלט קטניות בצהריים, ירקות בתנור בערב.",
+        note:"רגועה ורעננה. שבוע קל אחרי המרוץ."} },
+
+    { name:"אורי פרידמן", sport:"ריצת שטח · אולטרה",
+      hrv:[57,58,57,59,58,60,59], rhr:[45,45,46,45,45,44,45],
+      sleepH:[7.2,7.4,7.1,7.5,7.3,7.6,7.4], bb:[80,82,78,83,81,84,82],
+      sleepScore:[81,83,80,84,82,85,83], load:[65,70,60,75,55,70,62],
+      checkin:{done:true, sleepQ:4, soreness:2, energy:4, mood:4, stress:2,
+        ate:"בטטה, עדשים, טחינה. פרי יבש ואגוזים בטרייל. ביצים בבוקר.",
+        note:"הרגליים סופגות את הנפח יפה. מוכן לריצה הארוכה בסופ״ש."} }
+  ];
+
+  /* ---------- helpers ---------- */
+  const mean = a => a.reduce((x,y)=>x+y,0)/a.length;
+  const baseline = a => mean(a.slice(0,6));
+  const last = a => a[a.length-1];
+  const fmt = (n,d=0)=> n.toFixed(d);
+
+  function readiness(a){
+    const hrvB = baseline(a.hrv), hrvDev = (last(a.hrv)-hrvB)/hrvB;
+    const rhrB = baseline(a.rhr), rhrDev = (last(a.rhr)-rhrB)/rhrB;
+    const sleep = last(a.sleepH);
+    let s = 72 + hrvDev*115 - rhrDev*170 + (sleep-7)*7;
+    if(a.checkin.done){
+      const c=a.checkin;
+      s += (c.energy-3)*3.5 + (3-c.soreness)*2.5 + (3-c.stress)*2.5 + (c.sleepQ-3)*3;
+    }
+    return Math.max(3, Math.min(99, Math.round(s)));
+  }
+  const band = s => s>=70 ? "good" : s>=50 ? "warn" : "crit";
+  const bandLabel = b => b==="good" ? "מוכן" : b==="warn" ? "במעקב" : "בסיכון";
+
+  /* ---------- sparkline ---------- */
+  function sparkline(vals, {w=120,h=34,color="var(--accent)",pad=4}={}){
+    const min=Math.min(...vals), max=Math.max(...vals), rng=(max-min)||1;
+    const ix = i => pad + i*(w-2*pad)/(vals.length-1);
+    const iy = v => pad + (1-(v-min)/rng)*(h-2*pad);
+    const pts = vals.map((v,i)=>[ix(i),iy(v)]);
+    const line = pts.map((p,i)=>(i?"L":"M")+fmt(p[0],1)+" "+fmt(p[1],1)).join(" ");
+    const area = `M${fmt(pts[0][0],1)} ${h-pad} `+pts.map(p=>"L"+fmt(p[0],1)+" "+fmt(p[1],1)).join(" ")+` L${fmt(last(pts.map(p=>p[0])),1)} ${h-pad} Z`;
+    const e = pts[pts.length-1];
+    return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">
+      <path d="${area}" fill="${color}" fill-opacity="0.12"></path>
+      <path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+      <circle cx="${fmt(e[0],1)}" cy="${fmt(e[1],1)}" r="3.4" fill="${color}" stroke="var(--surface)" stroke-width="2"></circle>
+    </svg>`;
+  }
+
+  /* ---------- metric delta ---------- */
+  function delta(series, {invert=false, pct=false, dec=0}={}){
+    const b = baseline(series), t = last(series);
+    const diff = t-b;
+    const val = pct ? Math.round(diff/b*100) : diff;
+    if(Math.abs(pct?val:diff) < (pct?2:(dec?0.15:0.5))) return {cls:"flat", txt:"±0"};
+    const good = invert ? diff<0 : diff>0;
+    const dir = diff>0 ? "up" : "down";
+    const sign = diff>0 ? "+" : "−";
+    const mag = pct ? Math.abs(val)+"%" : fmt(Math.abs(diff), dec);
+    return {cls:dir+(good?"":" bad"), txt:sign+mag};
+  }
+
+  /* ---------- render coach view ---------- */
+  const enriched = ATHLETES.map(a=>({...a, score:readiness(a), b:band(readiness(a))}))
+    .sort((x,y)=>x.score-y.score);
+
+  function renderSummary(){
+    const c = {good:0,warn:0,crit:0};
+    enriched.forEach(a=>c[a.b]++);
+    const submitted = enriched.filter(a=>a.checkin.done).length;
+    $("#summary").innerHTML = `
+      <div class="stat crit"><div class="k">בסיכון · דורש התייחסות</div><div class="v">${c.crit}</div></div>
+      <div class="stat warn"><div class="k">במעקב</div><div class="v">${c.warn}</div></div>
+      <div class="stat good"><div class="k">מוכנים לאימון</div><div class="v">${c.good}</div></div>
+      <div class="stat"><div class="k">מילאו צ׳ק-אין</div><div class="v">${submitted}<small> / ${enriched.length}</small></div></div>`;
+  }
+
+  function metricEl(label, value, d){
+    return `<div class="metric"><span class="ml">${label}</span>
+      <span class="mv">${value}</span>
+      <span class="md ${d.cls}">${d.txt}</span></div>`;
+  }
+
+  function renderGrid(){
+    $("#grid").innerHTML = enriched.map((a,i)=>{
+      const dHrv = delta(a.hrv,{pct:true});
+      const dRhr = delta(a.rhr,{invert:true});
+      const dSleep = delta(a.sleepH,{dec:1});
+      const dBb = delta(a.bb);
+      return `<button class="card ${a.b}" data-i="${i}" aria-label="פירוט עבור ${a.name}">
+        <div class="card-head">
+          <div class="who">
+            <span class="name">${a.name}</span>
+            <span class="sport">${a.sport}</span>
+          </div>
+          <span class="pill ${a.b}"><span class="dot"></span>${bandLabel(a.b)} <span class="score">${a.score}</span></span>
+        </div>
+        <div class="metrics">
+          ${metricEl("שינה", fmt(last(a.sleepH),1)+"ש׳", dSleep)}
+          ${metricEl("HRV", last(a.hrv)+" מ״ש", dHrv)}
+          ${metricEl("דופק מנוחה", last(a.rhr), dRhr)}
+          ${metricEl("Body Battery", last(a.bb), dBb)}
+        </div>
+        <div class="card-foot">
+          ${a.checkin.done
+            ? `<span class="checkin-badge done"><span class="mk">✓</span>מילא/ה צ׳ק-אין</span>`
+            : `<span class="checkin-badge wait"><span class="mk">!</span>ממתין לצ׳ק-אין</span>`}
+          ${sparkline(a.hrv,{color:"var(--accent)"})}
+        </div>
+      </button>`;
+    }).join("");
+    document.querySelectorAll(".card").forEach(c=>{
+      c.addEventListener("click",()=>openModal(+c.dataset.i));
+    });
+  }
+
+  /* ---------- modal ---------- */
+  const SUBJ = [
+    {k:"sleepQ", l:"איכות שינה", good:"hi"},
+    {k:"energy", l:"אנרגיה", good:"hi"},
+    {k:"mood", l:"מצב רוח", good:"hi"},
+    {k:"soreness", l:"כאבי שרירים", good:"lo"},
+    {k:"stress", l:"רמת לחץ", good:"lo"}
+  ];
+  function segRow(row, val){
+    const segs = [1,2,3,4,5].map(n=>{
+      if(n>val) return `<span class="seg"></span>`;
+      let cls = "on";
+      const bad = row.good==="hi" ? val<=2 : val>=4;
+      const mid = val===3;
+      if(bad) cls+=" bad"; else if(mid) cls+=" mid";
+      return `<span class="seg ${cls}"></span>`;
+    }).join("");
+    return `<div class="srow"><span class="sl">${row.l}</span>
+      <span class="track">${segs}</span><span class="sn">${val}/5</span></div>`;
+  }
+
+  function trendEl(label, series, unit){
+    const min=Math.min(...series), max=Math.max(...series);
+    return `<div class="trend">
+      <div class="tl">${label}</div>
+      <div class="tv">${fmt(last(series), Number.isInteger(last(series))?0:1)}<small> ${unit}</small></div>
+      <div class="tspark">${sparkline(series,{w:260,h:52,color:"var(--accent)"})}</div>
+      <div class="trange"><span>שיא ${max}</span><span>לפני 7 ימים</span><span>שפל ${min}</span></div>
+    </div>`;
+  }
+
+  function openModal(i){
+    const a = enriched[i];
+    const c = a.checkin;
+    const subj = c.done
+      ? `<div class="subj"><h3>צ׳ק-אין הבוקר</h3><div class="subj-rows">
+          ${SUBJ.map(r=>segRow(r, c[r.k])).join("")}
+         </div>
+         <div class="note" style="margin-top:14px"><div class="nl">תזונה אתמול</div>${c.ate}</div>
+         <div class="note" style="margin-top:8px"><div class="nl">הערה של המתאמן/ת</div>${c.note}</div></div>`
+      : `<div class="subj"><h3>צ׳ק-אין הבוקר</h3>
+         <div class="no-checkin">טרם מולא. תזכורת נשלחה ב-06:00. שווה לבדוק לפני שמחליטים על האימון.</div></div>`;
+
+    $("#modal").innerHTML = `
+      <div class="modal-head">
+        <div>
+          <div class="name" id="modal-name">${a.name}</div>
+          <div class="sport">${a.sport}</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <span class="pill ${a.b}"><span class="dot"></span>${bandLabel(a.b)} <span class="score">${a.score}</span></span>
+          <button class="icon-btn" id="modal-close" aria-label="סגירה">✕</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="trend-grid">
+          ${trendEl("HRV (בוקר)", a.hrv, "מ״ש")}
+          ${trendEl("שעות שינה", a.sleepH, "ש׳")}
+          ${trendEl("דופק מנוחה", a.rhr, "פעימות")}
+          ${trendEl("עומס אימון יומי", a.load, "TL")}
+        </div>
+        ${subj}
+      </div>`;
+    $("#overlay").hidden = false;
+    document.body.style.overflow = "hidden";
+    $("#modal-close").addEventListener("click", closeModal);
+    $("#modal-close").focus();
+  }
+  function closeModal(){
+    $("#overlay").hidden = true;
+    document.body.style.overflow = "";
+  }
+  $("#overlay").addEventListener("click", e=>{ if(e.target.id==="overlay") closeModal(); });
+  document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
+
+  /* ---------- check-in form ---------- */
+  const FORM_FIELDS = [
+    {k:"sleepQ", l:"איך ישנת הלילה?", lo:"גרוע", hi:"מצוין"},
+    {k:"energy", l:"רמת האנרגיה עכשיו", lo:"אפס", hi:"מלא/ה"},
+    {k:"mood", l:"מצב רוח", lo:"נמוך", hi:"מרומם"},
+    {k:"soreness", l:"כאבי שרירים / נוקשות", lo:"אין", hi:"חזק מאוד"},
+    {k:"stress", l:"עומס נפשי / לחץ מחוץ לאימונים", lo:"רגוע", hi:"מוצף/ת"}
+  ];
+  const answers = {};
+  function renderForm(){
+    $("#form-wrap").innerHTML = `
+      <h2>צ׳ק-אין יומי</h2>
+      <div class="fsub">שתי דקות. עוזר לי להתאים לך את האימון של היום. <span class="demo-tag">דמו — לא נשמר</span></div>
+      <form id="checkin-form">
+        ${FORM_FIELDS.map(f=>`
+          <div class="field" data-k="${f.k}">
+            <label>${f.l}</label>
+            <div class="scale" role="group" aria-label="${f.l}">
+              ${[1,2,3,4,5].map(n=>`<button type="button" data-v="${n}" aria-pressed="false">${n}</button>`).join("")}
+            </div>
+            <div class="scale-ends"><span>${f.lo}</span><span>${f.hi}</span></div>
+          </div>`).join("")}
+        <div class="field">
+          <div class="row2">
+            <div><label for="hours">שעות שינה <span class="hint">(משוער)</span></label>
+              <input type="number" id="hours" step="0.25" min="0" max="14" placeholder="7.5"></div>
+            <div><label for="weight">משקל בוקר <span class="hint">(ק״ג, לא חובה)</span></label>
+              <input type="number" id="weight" step="0.1" placeholder="—"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="ate">מה אכלת אתמול? <span class="hint">(בגדול — ארוחות עיקריות, שתייה, חטיפים)</span></label>
+          <textarea id="ate" rows="3" placeholder="בוקר: ...&#10;צהריים: ...&#10;ערב: ..."></textarea>
+        </div>
+        <div class="field">
+          <label for="note">משהו שכדאי שאדע? <span class="hint">(פציעה, מחלה, לילה קשה, נסיעה...)</span></label>
+          <textarea id="note" rows="2" placeholder="לא חובה"></textarea>
+        </div>
+        <button type="submit" class="submit">שליחת צ׳ק-אין</button>
+      </form>`;
+
+    document.querySelectorAll("#checkin-form .scale").forEach(scale=>{
+      scale.addEventListener("click", e=>{
+        const btn = e.target.closest("button"); if(!btn) return;
+        const k = scale.closest(".field").dataset.k;
+        answers[k] = +btn.dataset.v;
+        scale.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed", b===btn ? "true":"false"));
+      });
+    });
+    $("#checkin-form").addEventListener("submit", e=>{
+      e.preventDefault();
+      $("#form-wrap").innerHTML = `
+        <div class="thanks">
+          <div class="big">✓</div>
+          <h2>נשלח, תודה!</h2>
+          <p>סיכמתי. אם משהו חריג — אעדכן אותך לפני האימון.<br>נתראה מחר בבוקר 🙌</p>
+        </div>`;
+    });
+  }
+
+  /* ---------- tabs ---------- */
+  const tabs = {
+    coach: {btn:$("#tab-coach"), panel:$("#view-coach")},
+    checkin: {btn:$("#tab-checkin"), panel:$("#view-checkin")}
+  };
+  function selectTab(name){
+    Object.entries(tabs).forEach(([n,t])=>{
+      const on = n===name;
+      t.btn.setAttribute("aria-selected", on ? "true":"false");
+      t.panel.hidden = !on;
+    });
+  }
+  tabs.coach.btn.addEventListener("click", ()=>selectTab("coach"));
+  tabs.checkin.btn.addEventListener("click", ()=>selectTab("checkin"));
+
+  /* ---------- theme toggle ---------- */
+  $("#theme-toggle").addEventListener("click", ()=>{
+    const cur = document.documentElement.getAttribute("data-theme");
+    const next = cur==="dark" ? "light" : cur==="light" ? "dark"
+      : (matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "dark");
+    document.documentElement.setAttribute("data-theme", next);
+  });
+
+  /* ---------- init ---------- */
+  renderSummary();
+  renderGrid();
+  renderForm();
+})();
+</script>
