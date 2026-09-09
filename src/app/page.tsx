@@ -1,69 +1,63 @@
-import Image from "next/image";
+import { DEMO_ATHLETES } from "@/lib/demo-data";
+import { band, readinessScore } from "@/lib/readiness";
+import { AthleteCard } from "@/components/AthleteCard";
 
-export default function Home() {
+const HE_DATE = new Intl.DateTimeFormat("he-IL", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+});
+
+export default function DashboardPage() {
+  const ranked = [...DEMO_ATHLETES]
+    .map((a) => ({ athlete: a, score: readinessScore(a) }))
+    .sort((x, y) => x.score - y.score);
+
+  const counts = { ready: 0, watch: 0, risk: 0 };
+  for (const { score } of ranked) counts[band(score)]++;
+  const submitted = ranked.filter((r) => r.athlete.checkin.submitted).length;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main>
+      <p className="brand sub" style={{ marginTop: "-14px", marginBottom: 18 }}>
+        <b>{HE_DATE.format(new Date())}</b> · {ranked.length} מתאמנים
+      </p>
+
+      <section className="summary">
+        <div className="stat risk">
+          <div className="k">בסיכון · דורש התייחסות</div>
+          <div className="v">{counts.risk}</div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="stat watch">
+          <div className="k">במעקב</div>
+          <div className="v">{counts.watch}</div>
         </div>
-      </main>
-    </div>
+        <div className="stat ready">
+          <div className="k">מוכנים לאימון</div>
+          <div className="v">{counts.ready}</div>
+        </div>
+        <div className="stat">
+          <div className="k">מילאו צ׳ק-אין</div>
+          <div className="v">
+            {submitted}
+            <small> / {ranked.length}</small>
+          </div>
+        </div>
+      </section>
+
+      <div className="section-label">מסודר לפי דחיפוּת · לחיצה על מתאמן לפירוט</div>
+
+      <div className="grid">
+        {ranked.map(({ athlete }) => (
+          <AthleteCard key={athlete.id} athlete={athlete} />
+        ))}
+      </div>
+
+      <p className="foot-note">
+        פרוטוטייפ · כל הנתונים מומצאים. בגרסה החיה נתוני השינה, ה־HRV, דופק המנוחה
+        ו־Body Battery מגיעים אוטומטית מהשעון של כל מתאמן, וכל בוקר נשלח לו קישור
+        אישי לצ׳ק-אין.
+      </p>
+    </main>
   );
 }

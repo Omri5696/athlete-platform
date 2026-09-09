@@ -1,12 +1,20 @@
 # תוכנית בנייה — Athlete Platform
 
-## שלב 0 — יסודות ✅ (בתהליך)
+## שלב 0 — יסודות ✅
 
 - [x] שלד Next.js 16 + TypeScript + Tailwind
 - [x] git init + commit ראשון
-- [ ] GitHub repo + push
-- [ ] חיבור Vercel ל-repo (דיפלוי אוטומטי בכל push)
+- [x] GitHub repo + push (`git@github.com:Omri5696/athlete-platform.git`)
+- [x] חיבור Vercel — דיפלוי אוטומטי בכל push (`athlete-platform-seven.vercel.app`)
 - [ ] פרויקט Supabase + חיבור מקומי (`.env.local`)
+
+## שלב 0.5 — המסכים עם נתוני דמה ✅
+
+- [x] דשבורד "מוקד בוקר" (`/`) — מיון לפי דחיפוּת, סיכום, כרטיסי מתאמן
+- [x] דף מתאמן (`/athletes/[id]`) — גרפי 7 ימים + צ׳ק-אין
+- [x] טופס צ׳ק-אין (`/checkin`) — עדיין לא נשמר
+- [x] מערכת עיצוב ב-`globals.css` (טוקנים מהפרוטוטייפ), רכיבים ב-`src/components/`
+- [x] לוגיקת ציון מוכנוּת ב-`src/lib/readiness.ts`, נתוני דמה ב-`src/lib/demo-data.ts`
 
 ## שלב 1 — שמיש בלי גרמין
 
