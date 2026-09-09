@@ -22,9 +22,12 @@
 
 - [x] סכימת DB: `coaches`, `athletes`, `daily_metrics`, `daily_checkins` + RLS (`supabase/migrations/0001_init.sql`)
 - [x] הדשבורד ודף המתאמן קוראים מ-DB (`src/lib/athletes.ts`); seed של 10 מתאמנים (`scripts/seed.ts`)
-- [ ] הגדרת 3 משתני סביבה ב-Vercel (אחרת הפרודקשן ריק)
-- [ ] Auth למאמן (Supabase Auth) — כרגע קוראים עם service-role בהנחת מאמן יחיד
-- [ ] דף צ׳ק-אין ציבורי לכל מתאמן (`/checkin/[token]`) — כרגע `/checkin` הוא דמו שלא נשמר
+- [x] 3 משתני סביבה ב-Vercel
+- [x] Auth למאמן (Supabase Auth) — login, proxy guard, `requireCoach()`; דפי מאמן ב-`(dash)/`
+- [x] ניהול מתאמנים (`/manage`) — הוספה/עריכה/ארכיון + קישור צ׳ק-אין אישי
+- [x] דף צ׳ק-אין ציבורי לכל מתאמן (`/checkin/[token]`) — שומר ל-DB
+- [ ] הרצת המיגרציה המעודכנת (grants ל-authenticated) דרך `scripts/db.ts`
+- [ ] כלי מיגרציה: `SUPABASE_ACCESS_TOKEN` ב-`.env.local`
 - [ ] הזנה ידנית של נתוני שעון (טופס למאמן) עד שגרמין מחובר
 - [ ] Vercel Cron יומי 06:00 → שליחת מייל עם קישור צ׳ק-אין אישי (Resend)
 

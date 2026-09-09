@@ -1,5 +1,6 @@
 import "server-only";
-import { createAdminClient } from "./supabase/server";
+import { createClient } from "./supabase/server";
+import { requireCoach } from "./auth";
 import type { Athlete, Checkin } from "./types";
 import type {
   AthleteRow,
@@ -8,21 +9,6 @@ import type {
 } from "./supabase/db-types";
 
 const WINDOW_DAYS = 7;
-
-/**
- * Until coach login exists there is exactly one coach. Grab their id.
- * When auth lands, this becomes `auth.uid()` and reads move to the RLS client.
- */
-async function soleCoachId(db: ReturnType<typeof createAdminClient>) {
-  const { data, error } = await db
-    .from("coaches")
-    .select("id")
-    .order("created_at")
-    .limit(1)
-    .maybeSingle();
-  if (error) throw error;
-  return data?.id ?? null;
-}
 
 function checkinFromRow(row: DailyCheckinRow | undefined): Checkin {
   if (
@@ -53,8 +39,7 @@ function assemble(
   metrics: DailyMetricRow[],
   checkin: DailyCheckinRow | undefined,
 ): Athlete {
-  // metrics arrive oldest-first; keep the last WINDOW_DAYS
-  const recent = metrics.slice(-WINDOW_DAYS);
+  const recent = metrics.slice(-WINDOW_DAYS); // metrics arrive oldest-first
   const num = (key: keyof DailyMetricRow) =>
     recent.map((m) => Number(m[key] ?? 0));
 
@@ -72,16 +57,14 @@ function assemble(
   };
 }
 
-/** All active athletes for the coach, each with their recent metrics + latest check-in. */
+/** All active athletes for the signed-in coach, with recent metrics + latest check-in. */
 export async function getRoster(): Promise<Athlete[]> {
-  const db = createAdminClient();
-  const coachId = await soleCoachId(db);
-  if (!coachId) return [];
+  await requireCoach();
+  const db = await createClient();
 
   const { data: athletes, error } = await db
     .from("athletes")
     .select("*")
-    .eq("coach_id", coachId)
     .is("archived_at", null)
     .order("name")
     .returns<AthleteRow[]>();
@@ -90,25 +73,27 @@ export async function getRoster(): Promise<Athlete[]> {
 
   const ids = athletes.map((a) => a.id);
 
-  const { data: metrics, error: mErr } = await db
-    .from("daily_metrics")
-    .select("*")
-    .in("athlete_id", ids)
-    .order("metric_date")
-    .returns<DailyMetricRow[]>();
+  const [{ data: metrics, error: mErr }, { data: checkins, error: cErr }] =
+    await Promise.all([
+      db
+        .from("daily_metrics")
+        .select("*")
+        .in("athlete_id", ids)
+        .order("metric_date")
+        .returns<DailyMetricRow[]>(),
+      db
+        .from("daily_checkins")
+        .select("*")
+        .in("athlete_id", ids)
+        .order("checkin_date", { ascending: false })
+        .returns<DailyCheckinRow[]>(),
+    ]);
   if (mErr) throw mErr;
-
-  const { data: checkins, error: cErr } = await db
-    .from("daily_checkins")
-    .select("*")
-    .in("athlete_id", ids)
-    .order("checkin_date", { ascending: false })
-    .returns<DailyCheckinRow[]>();
   if (cErr) throw cErr;
 
-  const metricsByAthlete = groupBy(metrics, (m) => m.athlete_id);
+  const metricsByAthlete = groupBy(metrics ?? [], (m) => m.athlete_id);
   const latestCheckin = new Map<string, DailyCheckinRow>();
-  for (const c of checkins) {
+  for (const c of checkins ?? []) {
     if (!latestCheckin.has(c.athlete_id)) latestCheckin.set(c.athlete_id, c);
   }
 
@@ -117,9 +102,54 @@ export async function getRoster(): Promise<Athlete[]> {
   );
 }
 
-/** One athlete by id, or null. */
+export interface AthleteAdmin {
+  id: string;
+  name: string;
+  focus: string;
+  checkinToken: string;
+  garminLinked: boolean;
+  hasCheckinToday: boolean;
+}
+
+/** Athlete list for the management screen. */
+export async function getManagedAthletes(): Promise<AthleteAdmin[]> {
+  await requireCoach();
+  const db = await createClient();
+
+  const { data: athletes, error } = await db
+    .from("athletes")
+    .select("*")
+    .is("archived_at", null)
+    .order("name")
+    .returns<AthleteRow[]>();
+  if (error) throw error;
+  if (!athletes.length) return [];
+
+  const today = new Date().toISOString().slice(0, 10);
+  const { data: todayCheckins } = await db
+    .from("daily_checkins")
+    .select("athlete_id")
+    .eq("checkin_date", today)
+    .in(
+      "athlete_id",
+      athletes.map((a) => a.id),
+    );
+  const submitted = new Set((todayCheckins ?? []).map((c) => c.athlete_id));
+
+  return athletes.map((a) => ({
+    id: a.id,
+    name: a.name,
+    focus: a.focus,
+    checkinToken: a.checkin_token,
+    garminLinked: a.garmin_linked,
+    hasCheckinToday: submitted.has(a.id),
+  }));
+}
+
+/** One athlete by id (own athletes only, enforced by RLS). */
 export async function getAthlete(id: string): Promise<Athlete | null> {
-  const db = createAdminClient();
+  await requireCoach();
+  const db = await createClient();
 
   const { data: row, error } = await db
     .from("athletes")
@@ -129,24 +159,26 @@ export async function getAthlete(id: string): Promise<Athlete | null> {
   if (error) throw error;
   if (!row) return null;
 
-  const { data: metrics, error: mErr } = await db
-    .from("daily_metrics")
-    .select("*")
-    .eq("athlete_id", id)
-    .order("metric_date")
-    .returns<DailyMetricRow[]>();
+  const [{ data: metrics, error: mErr }, { data: checkins, error: cErr }] =
+    await Promise.all([
+      db
+        .from("daily_metrics")
+        .select("*")
+        .eq("athlete_id", id)
+        .order("metric_date")
+        .returns<DailyMetricRow[]>(),
+      db
+        .from("daily_checkins")
+        .select("*")
+        .eq("athlete_id", id)
+        .order("checkin_date", { ascending: false })
+        .limit(1)
+        .returns<DailyCheckinRow[]>(),
+    ]);
   if (mErr) throw mErr;
-
-  const { data: checkins, error: cErr } = await db
-    .from("daily_checkins")
-    .select("*")
-    .eq("athlete_id", id)
-    .order("checkin_date", { ascending: false })
-    .limit(1)
-    .returns<DailyCheckinRow[]>();
   if (cErr) throw cErr;
 
-  return assemble(row, metrics, checkins[0]);
+  return assemble(row, metrics ?? [], (checkins ?? [])[0]);
 }
 
 function groupBy<T, K>(items: T[], key: (item: T) => K): Map<K, T[]> {

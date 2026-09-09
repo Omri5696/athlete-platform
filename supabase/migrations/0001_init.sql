@@ -122,8 +122,15 @@ create policy "coach manages own athletes' checkins"
 -- bypasses RLS. anon / authenticated stay ungranted until a feature needs
 -- them, and are gated by the RLS policies above when granted.
 -- ============================================================
-grant usage on schema public to service_role;
+grant usage on schema public to service_role, authenticated;
 grant all privileges on all tables in schema public to service_role;
 grant all privileges on all sequences in schema public to service_role;
 alter default privileges in schema public grant all on tables to service_role;
 alter default privileges in schema public grant all on sequences to service_role;
+
+-- authenticated (the logged-in coach) — RLS policies above restrict rows
+grant select, insert, update, delete on all tables in schema public to authenticated;
+grant usage on all sequences in schema public to authenticated;
+alter default privileges in schema public
+  grant select, insert, update, delete on tables to authenticated;
+alter default privileges in schema public grant usage on sequences to authenticated;

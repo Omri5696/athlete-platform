@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 const LINKS = [
   { href: "/", label: "מוקד בוקר" },
-  { href: "/checkin", label: "צ׳ק-אין יומי" },
+  { href: "/manage", label: "ניהול מתאמנים" },
 ];
 
 export function Nav() {
@@ -14,7 +14,9 @@ export function Nav() {
     <nav className="nav">
       {LINKS.map((l) => {
         const active =
-          l.href === "/" ? pathname === "/" : pathname.startsWith(l.href);
+          l.href === "/"
+            ? pathname === "/" || pathname.startsWith("/athletes")
+            : pathname.startsWith(l.href);
         return (
           <Link
             key={l.href}

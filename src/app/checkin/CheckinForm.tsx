@@ -15,9 +15,17 @@ const FIELDS = [
   },
 ] as const;
 
-export function CheckinForm() {
+interface Props {
+  /** when omitted, the form is a non-saving demo */
+  submitAction?: (formData: FormData) => Promise<{ error?: string } | void>;
+  greetingName?: string;
+}
+
+export function CheckinForm({ submitAction, greetingName }: Props) {
   const [scores, setScores] = useState<Record<string, number>>({});
   const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
 
   if (done) {
     return (
@@ -39,14 +47,28 @@ export function CheckinForm() {
     <div className="form-wrap">
       <h1>צ׳ק-אין יומי</h1>
       <div className="fsub">
-        שתי דקות. עוזר לי להתאים לך את האימון של היום.{" "}
-        <span className="demo-tag">דמו — לא נשמר</span>
+        {greetingName ? `בוקר טוב, ${greetingName}. ` : ""}שתי דקות. עוזר למאמן
+        להתאים לך את האימון של היום.
+        {!submitAction && <span className="demo-tag">דמו — לא נשמר</span>}
       </div>
 
       <form
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
-          setDone(true);
+          setError(null);
+          const formData = new FormData(e.currentTarget);
+          for (const [k, v] of Object.entries(scores))
+            formData.set(k, String(v));
+
+          if (!submitAction) {
+            setDone(true);
+            return;
+          }
+          setPending(true);
+          const res = await submitAction(formData);
+          setPending(false);
+          if (res && "error" in res && res.error) setError(res.error);
+          else setDone(true);
         }}
       >
         {FIELDS.map((f) => (
@@ -74,12 +96,13 @@ export function CheckinForm() {
         <div className="field">
           <div className="row2">
             <div>
-              <label htmlFor="hours">
+              <label htmlFor="sleepHours">
                 שעות שינה <span className="hint">(משוער)</span>
               </label>
               <input
                 type="number"
-                id="hours"
+                id="sleepHours"
+                name="sleepHours"
                 step="0.25"
                 min="0"
                 max="14"
@@ -87,10 +110,16 @@ export function CheckinForm() {
               />
             </div>
             <div>
-              <label htmlFor="weight">
+              <label htmlFor="weightKg">
                 משקל בוקר <span className="hint">(ק״ג, לא חובה)</span>
               </label>
-              <input type="number" id="weight" step="0.1" placeholder="—" />
+              <input
+                type="number"
+                id="weightKg"
+                name="weightKg"
+                step="0.1"
+                placeholder="—"
+              />
             </div>
           </div>
         </div>
@@ -100,19 +129,26 @@ export function CheckinForm() {
             מה אכלת אתמול?{" "}
             <span className="hint">(בגדול — ארוחות עיקריות, שתייה, חטיפים)</span>
           </label>
-          <textarea id="ate" rows={3} placeholder={"בוקר: ...\nצהריים: ...\nערב: ..."} />
+          <textarea
+            id="ate"
+            name="ate"
+            rows={3}
+            placeholder={"בוקר: ...\nצהריים: ...\nערב: ..."}
+          />
         </div>
 
         <div className="field">
           <label htmlFor="note">
-            משהו שכדאי שאדע?{" "}
+            משהו שכדאי שהמאמן יֵדע?{" "}
             <span className="hint">(פציעה, מחלה, לילה קשה, נסיעה...)</span>
           </label>
-          <textarea id="note" rows={2} placeholder="לא חובה" />
+          <textarea id="note" name="note" rows={2} placeholder="לא חובה" />
         </div>
 
-        <button type="submit" className="submit">
-          שליחת צ׳ק-אין
+        {error && <p className="form-error">{error}</p>}
+
+        <button type="submit" className="submit" disabled={pending}>
+          {pending ? "שולח…" : "שליחת צ׳ק-אין"}
         </button>
       </form>
     </div>

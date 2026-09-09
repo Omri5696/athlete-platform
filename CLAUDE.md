@@ -43,10 +43,22 @@
 
 ## מפתחות וסביבה
 
-- `.env.local` (gitignored) — `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-  (publishable), `SUPABASE_SERVICE_ROLE_KEY` (secret). תבנית ב-`.env.example`.
-- אותם 3 צריכים להיות מוגדרים גם ב-Vercel (Project Settings → Environment Variables).
-- להריץ סקריפט מקומי: `set -a && . ./.env.local && set +a && npx tsx scripts/<x>.ts`
+- `.env.local` (gitignored): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  (publishable), `SUPABASE_SERVICE_ROLE_KEY` (secret), `SUPABASE_ACCESS_TOKEN`
+  (personal token — local tooling only). תבנית ב-`.env.example`.
+- שלושת ה-`SUPABASE_*` הראשונים (לא ה-ACCESS_TOKEN) מוגדרים גם ב-Vercel.
+- הרצת סקריפט: `set -a && . ./.env.local && set +a && npx tsx scripts/<x>.ts`
+- מיגרציות: `npx tsx scripts/db.ts supabase/migrations/<file>.sql` (Management API, לא SQL editor)
+- קישור הגדרת סיסמה למאמן: `npx tsx scripts/coach-link.ts [email] [--local]`
+
+## Auth
+
+Supabase Auth (email+password). `proxy.ts` → `src/lib/supabase/middleware.ts` מרענן
+session ומפנה ל-`/login`; כל page/action מוגן קורא `requireCoach()` (`src/lib/auth.ts`).
+דפי המאמן תחת `src/app/(dash)/` (route group, layout עם header+guard). ציבורי:
+`/login`, `/auth/*`, `/checkin`, `/checkin/[token]`. קריאות מ-`src/lib/athletes.ts`
+עברו ל-authed client (RLS), לא admin. הצ׳ק-אין הציבורי (`/checkin/[token]`) שומר ל-DB
+דרך admin client עם אימות token.
 
 ## מוסכמות
 
