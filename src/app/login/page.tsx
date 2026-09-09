@@ -1,3 +1,4 @@
+import { Wordmark } from "@/components/Wordmark";
 import { LoginForm } from "./LoginForm";
 
 export const metadata = { title: "כניסה — מוקד בוקר" };
@@ -11,7 +12,7 @@ export default async function LoginPage({
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <h1>מוקד בוקר</h1>
+        <Wordmark />
         <p className="auth-sub">כניסת מאמן</p>
         <LoginForm next={target} />
       </div>

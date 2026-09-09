@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { requireCoach } from "@/lib/auth";
 import { Nav } from "@/components/Nav";
+import { Wordmark } from "@/components/Wordmark";
 import { signOut } from "@/app/login/actions";
 
 export default async function DashLayout({ children }: { children: ReactNode }) {
@@ -9,12 +10,7 @@ export default async function DashLayout({ children }: { children: ReactNode }) 
   return (
     <div className="page">
       <header className="topbar">
-        <div className="brand">
-          <h1>מוקד בוקר</h1>
-          <div className="sub">
-            מחובר כ־<b>{coach.name}</b>
-          </div>
-        </div>
+        <Wordmark who={coach.name} />
         <div className="topbar-actions">
           <Nav />
           <form action={signOut}>

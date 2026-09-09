@@ -1,12 +1,7 @@
 import type { Metadata } from "next";
-import { Rubik, Heebo, IBM_Plex_Mono } from "next/font/google";
+import { Heebo, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
-const rubik = Rubik({
-  variable: "--font-rubik",
-  subsets: ["hebrew", "latin"],
-  weight: ["500", "600", "700"],
-});
 const heebo = Heebo({
   variable: "--font-heebo",
   subsets: ["hebrew", "latin"],
@@ -15,12 +10,12 @@ const heebo = Heebo({
 const plexMono = IBM_Plex_Mono({
   variable: "--font-plex-mono",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
-  title: "מוקד בוקר — Athlete Platform",
-  description: "דשבורד מוכנוּת יומי למאמן",
+  title: "מוקד בוקר",
+  description: "כלי ליווי יומי למאמן — מוכנוּת וצ׳ק-אין של המתאמנים",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -28,7 +23,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="he"
       dir="rtl"
-      className={`${rubik.variable} ${heebo.variable} ${plexMono.variable}`}
+      className={`${heebo.variable} ${plexMono.variable}`}
     >
       <body>{children}</body>
     </html>

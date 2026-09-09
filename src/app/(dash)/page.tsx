@@ -25,7 +25,7 @@ export default async function DashboardPage() {
     return (
       <main>
         <div className="panel" style={{ textAlign: "center", padding: "40px 20px" }}>
-          עדיין אין מתאמנים במערכת. הוספת מתאמנים תגיע בשלב הבא.
+          עדיין אין מתאמנים. הוסף מתאמנים במסך <b>ניהול מתאמנים</b>.
         </div>
       </main>
     );
@@ -33,8 +33,9 @@ export default async function DashboardPage() {
 
   return (
     <main>
-      <p className="brand sub" style={{ marginTop: "-14px", marginBottom: 18 }}>
-        <b>{HE_DATE.format(new Date())}</b> · {ranked.length} מתאמנים
+      <p className="page-intro">
+        <span className="today">{HE_DATE.format(new Date())}</span>
+        <span>{ranked.length} מתאמנים · {submitted} מילאו צ׳ק-אין</span>
       </p>
 
       <section className="summary">
@@ -51,7 +52,7 @@ export default async function DashboardPage() {
           <div className="v">{counts.ready}</div>
         </div>
         <div className="stat">
-          <div className="k">מילאו צ׳ק-אין</div>
+          <div className="k">צ׳ק-אין היום</div>
           <div className="v">
             {submitted}
             <small> / {ranked.length}</small>
@@ -66,12 +67,6 @@ export default async function DashboardPage() {
           <AthleteCard key={athlete.id} athlete={athlete} />
         ))}
       </div>
-
-      <p className="foot-note">
-        נתוני דמה מתוך מסד הנתונים. בגרסה החיה נתוני השינה, ה־HRV, דופק המנוחה
-        ו־Body Battery יגיעו אוטומטית מהשעון של כל מתאמן, וכל בוקר יישלח לו קישור
-        אישי לצ׳ק-אין.
-      </p>
     </main>
   );
 }
