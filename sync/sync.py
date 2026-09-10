@@ -260,10 +260,14 @@ def main() -> None:
 
         print(f"\n▶ {email}  →  athlete {aid}")
         try:
-            api = Garmin(email, acc["password"], prompt_mfa=lambda: input("Garmin MFA code: "))
+            try:
+                api = Garmin(email, acc["password"], prompt_mfa=lambda: input("Garmin MFA code: "))
+            except TypeError:
+                api = Garmin(email, acc["password"])  # older lib, no prompt_mfa arg
             api.login(str(token_dir))
         except Exception as e:  # noqa: BLE001
             print(f"  login failed: {e}")
+            print("  (if this mentions Cloudflare / 403 / TLS: your garminconnect is too old — needs Python 3.12+ and garminconnect>=0.3.13)")
             continue
 
         rows = []
