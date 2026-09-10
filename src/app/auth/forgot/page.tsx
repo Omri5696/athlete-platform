@@ -13,17 +13,17 @@ export default function ForgotPage() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <h1>איפוס סיסמה</h1>
+        <h1 style={{ fontSize: 18, fontWeight: 700 }}>איפוס סיסמה</h1>
         <p className="auth-sub">נשלח קישור לאימייל שלך</p>
 
         <form action={formAction} className="auth-form">
-          <div className="field">
-            <label htmlFor="email">אימייל</label>
-            <input type="email" id="email" name="email" required />
-          </div>
-
           {state.error && <p className="form-error">{state.error}</p>}
           {state.ok && <p className="form-ok">{state.ok}</p>}
+
+          <label className="fld">
+            <span>אימייל</span>
+            <input className="input" type="email" name="email" required />
+          </label>
 
           <button type="submit" className="submit" disabled={pending}>
             {pending ? "שולח…" : "שליחת קישור"}

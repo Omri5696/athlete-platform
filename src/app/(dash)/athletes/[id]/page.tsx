@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAthlete } from "@/lib/athletes";
 import { band, bandLabel, latest, readinessScore } from "@/lib/readiness";
+import { athleteFlags } from "@/lib/flags";
+import { getCoachSettings } from "@/lib/settings";
 import { Sparkline } from "@/components/Sparkline";
 import type { Checkin } from "@/lib/types";
 
@@ -74,32 +76,41 @@ export default async function AthletePage({
   params,
 }: PageProps<"/athletes/[id]">) {
   const { id } = await params;
-  const athlete = await getAthlete(id);
+  const [athlete, settings] = await Promise.all([getAthlete(id), getCoachSettings()]);
   if (!athlete) notFound();
 
   const score = readinessScore(athlete);
-  const b = band(score);
+  const b = band(score, settings.readiness);
+  const flags = athleteFlags(athlete);
   const { checkin } = athlete;
 
   return (
-    <main>
+    <>
+      <Link href="/" className="back-link">
+        ← חזרה לדשבורד
+      </Link>
       <div className="detail-head">
         <div>
-          <Link href="/" className="back-link">
-            ← חזרה למוקד הבוקר
-          </Link>
-          <div className="name" style={{ marginTop: 8 }}>
-            {athlete.name}
-          </div>
-          <div className="focus">{athlete.focus}</div>
+          <div className="name">{athlete.name}</div>
+          <div className="focus">{athlete.focus || "—"}</div>
         </div>
         <span className={`pill ${b}`}>
           <span className="dot" />
-          {bandLabel[b]} <span className="score">{score}</span>
+          {bandLabel[b]} {score}
         </span>
       </div>
 
-      <div className="section-label">7 ימים אחרונים</div>
+      {flags.length > 0 && (
+        <div className="flag-row">
+          {flags.map((f) => (
+            <span key={f.key} className={`flag ${f.severity === "risk" ? "risk" : ""}`}>
+              {f.label}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <p className="section-title">7 ימים אחרונים</p>
       <div className="trend-grid">
         <Trend label="HRV (בוקר)" series={athlete.hrv} unit="מ״ש" />
         <Trend label="שעות שינה" series={athlete.sleepHours} unit="ש׳" />
@@ -132,10 +143,10 @@ export default async function AthletePage({
           </>
         ) : (
           <div className="no-checkin">
-            טרם מולא. תזכורת נשלחה ב־06:00. שווה לבדוק לפני שמחליטים על האימון.
+            טרם מולא היום. שווה לבדוק לפני שמחליטים על האימון.
           </div>
         )}
       </div>
-    </main>
+    </>
   );
 }

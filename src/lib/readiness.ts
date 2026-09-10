@@ -35,9 +35,12 @@ export function readinessScore(a: Athlete): number {
   return Math.max(3, Math.min(99, Math.round(s)));
 }
 
-export function band(score: number): Band {
-  if (score >= 70) return "ready";
-  if (score >= 50) return "watch";
+export function band(
+  score: number,
+  thresholds: { greenAt: number; amberAt: number } = { greenAt: 70, amberAt: 50 },
+): Band {
+  if (score >= thresholds.greenAt) return "ready";
+  if (score >= thresholds.amberAt) return "watch";
   return "risk";
 }
 

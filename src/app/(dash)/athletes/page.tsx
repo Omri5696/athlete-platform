@@ -3,9 +3,9 @@ import { getManagedAthletes } from "@/lib/athletes";
 import { AthleteManager } from "@/components/AthleteManager";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "ניהול מתאמנים — מוקד בוקר" };
+export const metadata = { title: "מתאמנים — קשב" };
 
-export default async function ManagePage() {
+export default async function AthletesPage() {
   const athletes = await getManagedAthletes();
 
   const h = await headers();
@@ -14,11 +14,14 @@ export default async function ManagePage() {
   const origin = `${proto}://${host}`;
 
   return (
-    <main>
+    <>
+      <div className="page-head">
+        <h1>מתאמנים</h1>
+        <p className="sub">
+          {athletes.length} פעילים · לכל מתאמן קישור אישי לצ׳ק-אין
+        </p>
+      </div>
       <AthleteManager athletes={athletes} origin={origin} />
-      <p className="foot-note">
-        כל מתאמן מקבל קישור אישי לצ׳ק-אין. בהמשך נשלח אותו אוטומטית במייל כל בוקר.
-      </p>
-    </main>
+    </>
   );
 }

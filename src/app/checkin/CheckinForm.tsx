@@ -1,28 +1,17 @@
 "use client";
 
 import { useState } from "react";
-
-const FIELDS = [
-  { key: "sleepQuality", label: "איך ישנת הלילה?", lo: "גרוע", hi: "מצוין" },
-  { key: "energy", label: "רמת האנרגיה עכשיו", lo: "אפס", hi: "מלא/ה" },
-  { key: "mood", label: "מצב רוח", lo: "נמוך", hi: "מרומם" },
-  { key: "soreness", label: "כאבי שרירים / נוקשות", lo: "אין", hi: "חזק מאוד" },
-  {
-    key: "stress",
-    label: "עומס נפשי / לחץ מחוץ לאימונים",
-    lo: "רגוע",
-    hi: "מוצף/ת",
-  },
-] as const;
+import type { Question } from "@/lib/questionnaire";
 
 interface Props {
-  /** when omitted, the form is a non-saving demo */
-  submitAction?: (formData: FormData) => Promise<{ error?: string } | void>;
+  questions: Question[];
+  submitAction: (values: Record<string, string>) => Promise<{ error?: string } | void>;
   greetingName?: string;
+  demo?: boolean;
 }
 
-export function CheckinForm({ submitAction, greetingName }: Props) {
-  const [scores, setScores] = useState<Record<string, number>>({});
+export function CheckinForm({ questions, submitAction, greetingName, demo }: Props) {
+  const [scales, setScales] = useState<Record<string, number>>({});
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -49,101 +38,77 @@ export function CheckinForm({ submitAction, greetingName }: Props) {
       <div className="fsub">
         {greetingName ? `בוקר טוב, ${greetingName}. ` : ""}שתי דקות. עוזר למאמן
         להתאים לך את האימון של היום.
-        {!submitAction && <span className="demo-tag">דמו — לא נשמר</span>}
+        {demo && (
+          <span className="pill plain" style={{ marginInlineStart: 8 }}>
+            דמו — לא נשמר
+          </span>
+        )}
       </div>
 
       <form
         onSubmit={async (e) => {
           e.preventDefault();
           setError(null);
-          const formData = new FormData(e.currentTarget);
-          for (const [k, v] of Object.entries(scores))
-            formData.set(k, String(v));
+          const fd = new FormData(e.currentTarget);
+          const values: Record<string, string> = {};
+          for (const [k, v] of fd.entries()) values[k] = String(v);
+          for (const [k, v] of Object.entries(scales)) values[k] = String(v);
 
-          if (!submitAction) {
-            setDone(true);
-            return;
-          }
           setPending(true);
-          const res = await submitAction(formData);
+          const res = await submitAction(values);
           setPending(false);
           if (res && "error" in res && res.error) setError(res.error);
           else setDone(true);
         }}
       >
-        {FIELDS.map((f) => (
-          <div className="field" key={f.key}>
-            <label>{f.label}</label>
-            <div className="scale" role="group" aria-label={f.label}>
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  type="button"
-                  key={n}
-                  aria-pressed={scores[f.key] === n}
-                  onClick={() => setScores((s) => ({ ...s, [f.key]: n }))}
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
-            <div className="scale-ends">
-              <span>{f.lo}</span>
-              <span>{f.hi}</span>
-            </div>
+        {questions.map((q) => (
+          <div className="q" key={q.id}>
+            {q.kind === "scale" && (
+              <>
+                <label>{q.label}</label>
+                <div className="scale" role="group" aria-label={q.label}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      type="button"
+                      key={n}
+                      aria-pressed={scales[q.key] === n}
+                      onClick={() => setScales((s) => ({ ...s, [q.key]: n }))}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+                {(q.lowLabel || q.highLabel) && (
+                  <div className="scale-ends">
+                    <span>{q.lowLabel}</span>
+                    <span>{q.highLabel}</span>
+                  </div>
+                )}
+              </>
+            )}
+
+            {q.kind === "number" && (
+              <label className="fld">
+                <span>{q.label}</span>
+                <input className="input" type="number" name={q.key} step="0.1" inputMode="decimal" />
+              </label>
+            )}
+
+            {q.kind === "text" && (
+              <label className="fld">
+                <span>{q.label}</span>
+                <textarea className="input" name={q.key} rows={2} />
+              </label>
+            )}
+
+            {q.kind === "boolean" && (
+              <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14 }}>
+                <input type="checkbox" name={q.key} value="yes" />
+                {q.label}
+              </label>
+            )}
           </div>
         ))}
-
-        <div className="field">
-          <div className="row2">
-            <div>
-              <label htmlFor="sleepHours">
-                שעות שינה <span className="hint">(משוער)</span>
-              </label>
-              <input
-                type="number"
-                id="sleepHours"
-                name="sleepHours"
-                step="0.25"
-                min="0"
-                max="14"
-                placeholder="7.5"
-              />
-            </div>
-            <div>
-              <label htmlFor="weightKg">
-                משקל בוקר <span className="hint">(ק״ג, לא חובה)</span>
-              </label>
-              <input
-                type="number"
-                id="weightKg"
-                name="weightKg"
-                step="0.1"
-                placeholder="—"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="field">
-          <label htmlFor="ate">
-            מה אכלת אתמול?{" "}
-            <span className="hint">(בגדול — ארוחות עיקריות, שתייה, חטיפים)</span>
-          </label>
-          <textarea
-            id="ate"
-            name="ate"
-            rows={3}
-            placeholder={"בוקר: ...\nצהריים: ...\nערב: ..."}
-          />
-        </div>
-
-        <div className="field">
-          <label htmlFor="note">
-            משהו שכדאי שהמאמן יֵדע?{" "}
-            <span className="hint">(פציעה, מחלה, לילה קשה, נסיעה...)</span>
-          </label>
-          <textarea id="note" name="note" rows={2} placeholder="לא חובה" />
-        </div>
 
         {error && <p className="form-error">{error}</p>}
 

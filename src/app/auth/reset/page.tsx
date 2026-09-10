@@ -12,35 +12,35 @@ export default function ResetPage() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <h1>בחירת סיסמה</h1>
+        <h1 style={{ fontSize: 18, fontWeight: 700 }}>בחירת סיסמה</h1>
         <p className="auth-sub">הגדר סיסמה חדשה לחשבון</p>
 
         <form action={formAction} className="auth-form">
-          <div className="field">
-            <label htmlFor="password">סיסמה חדשה</label>
+          {state.error && <p className="form-error">{state.error}</p>}
+
+          <label className="fld">
+            <span>סיסמה חדשה</span>
             <input
+              className="input"
               type="password"
-              id="password"
               name="password"
               autoComplete="new-password"
               minLength={8}
               required
             />
             <span className="hint">לפחות 8 תווים</span>
-          </div>
+          </label>
 
-          <div className="field">
-            <label htmlFor="confirm">אימות סיסמה</label>
+          <label className="fld">
+            <span>אימות סיסמה</span>
             <input
+              className="input"
               type="password"
-              id="confirm"
               name="confirm"
               autoComplete="new-password"
               required
             />
-          </div>
-
-          {state.error && <p className="form-error">{state.error}</p>}
+          </label>
 
           <button type="submit" className="submit" disabled={pending}>
             {pending ? "שומר…" : "שמירה וכניסה"}

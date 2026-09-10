@@ -8,7 +8,7 @@ import {
   updateAthlete,
   archiveAthlete,
   type ManageState,
-} from "@/app/(dash)/manage/actions";
+} from "@/app/(dash)/athletes/actions";
 
 function AddForm({ onDone }: { onDone: () => void }) {
   const [state, action, pending] = useActionState<ManageState, FormData>(
@@ -21,23 +21,15 @@ function AddForm({ onDone }: { onDone: () => void }) {
   );
 
   return (
-    <form action={action} className="inline-form">
-      <div className="field">
-        <label htmlFor="add-name">שם</label>
-        <input id="add-name" name="name" required autoFocus />
+    <form action={action} style={{ marginBottom: 14 }}>
+      <div className="addbar">
+        <input className="input" name="name" placeholder="שם המתאמן" required autoFocus />
+        <input className="input" name="focus" placeholder="מיקוד אימון (למשל: מרתון)" />
+        <button className="btn primary" type="submit" disabled={pending}>
+          {pending ? "מוסיף…" : "הוספה"}
+        </button>
       </div>
-      <div className="field">
-        <label htmlFor="add-focus">מיקוד אימון</label>
-        <input id="add-focus" name="focus" placeholder="מרתון · שבוע עומס" />
-      </div>
-      <button type="submit" className="btn primary" disabled={pending}>
-        {pending ? "מוסיף…" : "הוספה"}
-      </button>
-      {state.error && (
-        <p className="form-error" style={{ gridColumn: "1 / -1" }}>
-          {state.error}
-        </p>
-      )}
+      {state.error && <p className="form-error">{state.error}</p>}
     </form>
   );
 }
@@ -59,29 +51,19 @@ function EditForm({
   );
 
   return (
-    <form action={action} className="inline-form">
+    <form action={action} className="li" style={{ display: "block" }}>
       <input type="hidden" name="id" value={athlete.id} />
-      <div className="field">
-        <label>שם</label>
-        <input name="name" defaultValue={athlete.name} required autoFocus />
-      </div>
-      <div className="field">
-        <label>מיקוד אימון</label>
-        <input name="focus" defaultValue={athlete.focus} />
-      </div>
-      <div style={{ display: "flex", gap: 6 }}>
-        <button type="submit" className="btn primary" disabled={pending}>
+      <div className="addbar" style={{ margin: 0 }}>
+        <input className="input" name="name" defaultValue={athlete.name} required autoFocus />
+        <input className="input" name="focus" defaultValue={athlete.focus} placeholder="מיקוד אימון" />
+        <button className="btn primary" type="submit" disabled={pending}>
           שמירה
         </button>
-        <button type="button" className="btn" onClick={onDone}>
+        <button type="button" className="btn ghost" onClick={onDone}>
           ביטול
         </button>
       </div>
-      {state.error && (
-        <p className="form-error" style={{ gridColumn: "1 / -1" }}>
-          {state.error}
-        </p>
-      )}
+      {state.error && <p className="form-error" style={{ marginTop: 10 }}>{state.error}</p>}
     </form>
   );
 }
@@ -89,8 +71,14 @@ function EditForm({
 function CopyLink({ url }: { url: string }) {
   const [copied, setCopied] = useState(false);
   return (
-    <div className="link-field">
-      <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} />
+    <div className="addbar" style={{ margin: "8px 0 0" }}>
+      <input
+        className="input"
+        readOnly
+        value={url}
+        onFocus={(e) => e.currentTarget.select()}
+        style={{ fontSize: 12 }}
+      />
       <button
         type="button"
         className="btn sm"
@@ -100,11 +88,11 @@ function CopyLink({ url }: { url: string }) {
             setCopied(true);
             setTimeout(() => setCopied(false), 1500);
           } catch {
-            /* clipboard blocked — the field is selectable as a fallback */
+            /* field is selectable as fallback */
           }
         }}
       >
-        {copied ? "הועתק ✓" : "העתקת קישור"}
+        {copied ? "הועתק ✓" : "העתקה"}
       </button>
     </div>
   );
@@ -112,51 +100,58 @@ function CopyLink({ url }: { url: string }) {
 
 function Row({ athlete, origin }: { athlete: AthleteAdmin; origin: string }) {
   const [editing, setEditing] = useState(false);
+  const [showLink, setShowLink] = useState(false);
   const checkinUrl = `${origin}/checkin/${athlete.checkinToken}`;
 
-  if (editing) {
-    return <EditForm athlete={athlete} onDone={() => setEditing(false)} />;
-  }
+  if (editing) return <EditForm athlete={athlete} onDone={() => setEditing(false)} />;
 
   return (
-    <div className="athlete-row">
-      <div className="who">
-        <div className="rn">
-          <Link
-            href={`/athletes/${athlete.id}`}
-            style={{ color: "inherit", textDecoration: "none" }}
-          >
-            {athlete.name}
-          </Link>
+    <div className="li" style={{ display: "block" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div className="grow">
+          <div className="t">
+            <Link
+              href={`/athletes/${athlete.id}`}
+              style={{ color: "inherit", textDecoration: "none" }}
+            >
+              {athlete.name}
+            </Link>
+          </div>
+          <div className="meta">
+            <span>{athlete.focus || "—"}</span>
+            <span className={`pill ${athlete.hasCheckinToday ? "ready" : "plain"}`}>
+              <span className="dot" />
+              {athlete.hasCheckinToday ? "צ׳ק-אין היום" : "אין צ׳ק-אין"}
+            </span>
+            {athlete.garminLinked && (
+              <span className="pill plain">
+                <span className="dot" />
+                גרמין
+              </span>
+            )}
+          </div>
         </div>
-        <div className="rf">{athlete.focus || "—"}</div>
-      </div>
-
-      <div className="row-actions">
-        <span className={`tag ${athlete.hasCheckinToday ? "on" : "off"}`}>
-          {athlete.hasCheckinToday ? "צ׳ק-אין היום" : "אין צ׳ק-אין"}
-        </span>
-        <span className={`tag ${athlete.garminLinked ? "on" : "off"}`}>
-          {athlete.garminLinked ? "גרמין מחובר" : "גרמין לא מחובר"}
-        </span>
-        <button type="button" className="btn sm" onClick={() => setEditing(true)}>
-          עריכה
-        </button>
-        <form
-          action={archiveAthlete}
-          onSubmit={(e) => {
-            if (!confirm(`להעביר את ${athlete.name} לארכיון?`))
-              e.preventDefault();
-          }}
-        >
-          <input type="hidden" name="id" value={athlete.id} />
-          <button type="submit" className="btn sm danger">
-            ארכיון
+        <div className="acts">
+          <button type="button" className="btn ghost sm" onClick={() => setShowLink((v) => !v)}>
+            קישור צ׳ק-אין
           </button>
-        </form>
+          <button type="button" className="btn ghost sm" onClick={() => setEditing(true)}>
+            עריכה
+          </button>
+          <form
+            action={archiveAthlete}
+            onSubmit={(e) => {
+              if (!confirm(`להעביר את ${athlete.name} לארכיון?`)) e.preventDefault();
+            }}
+          >
+            <input type="hidden" name="id" value={athlete.id} />
+            <button type="submit" className="btn ghost sm danger">
+              ארכיון
+            </button>
+          </form>
+        </div>
       </div>
-
-      <CopyLink url={checkinUrl} />
+      {showLink && <CopyLink url={checkinUrl} />}
     </div>
   );
 }
@@ -171,17 +166,9 @@ export function AthleteManager({
   const [adding, setAdding] = useState(false);
 
   return (
-    <section>
-      <div className="manage-head">
-        <div>
-          <h2>ניהול מתאמנים</h2>
-          <span className="count">{athletes.length} פעילים</span>
-        </div>
-        <button
-          type="button"
-          className="btn primary"
-          onClick={() => setAdding((v) => !v)}
-        >
+    <>
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 14 }}>
+        <button type="button" className="btn primary" onClick={() => setAdding((v) => !v)}>
           {adding ? "סגירה" : "הוספת מתאמן"}
         </button>
       </div>
@@ -189,16 +176,14 @@ export function AthleteManager({
       {adding && <AddForm onDone={() => setAdding(false)} />}
 
       {athletes.length === 0 ? (
-        <div className="panel" style={{ textAlign: "center", padding: "32px" }}>
-          עדיין אין מתאמנים. לחץ &quot;הוספת מתאמן&quot; כדי להתחיל.
-        </div>
+        <div className="empty">אין מתאמנים. לחץ &quot;הוספת מתאמן&quot; כדי להתחיל.</div>
       ) : (
-        <div className="athlete-rows">
+        <div className="list">
           {athletes.map((a) => (
             <Row key={a.id} athlete={a} origin={origin} />
           ))}
         </div>
       )}
-    </section>
+    </>
   );
 }

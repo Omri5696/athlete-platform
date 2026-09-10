@@ -24,7 +24,7 @@ export async function addAthlete(
     .insert({ coach_id: coach.id, name, focus });
   if (error) return { error: "לא הצלחנו להוסיף. נסה שוב." };
 
-  revalidatePath("/manage");
+  revalidatePath("/athletes");
   revalidatePath("/");
   return { ok: true };
 }
@@ -46,7 +46,7 @@ export async function updateAthlete(
     .eq("id", id);
   if (error) return { error: "לא הצלחנו לשמור." };
 
-  revalidatePath("/manage");
+  revalidatePath("/athletes");
   revalidatePath("/");
   revalidatePath(`/athletes/${id}`);
   return { ok: true };
@@ -63,6 +63,6 @@ export async function archiveAthlete(formData: FormData): Promise<void> {
     .update({ archived_at: new Date().toISOString() })
     .eq("id", id);
 
-  revalidatePath("/manage");
+  revalidatePath("/athletes");
   revalidatePath("/");
 }

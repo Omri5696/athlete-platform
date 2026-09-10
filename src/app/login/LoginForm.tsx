@@ -14,23 +14,29 @@ export function LoginForm({ next }: { next: string }) {
     <form action={formAction} className="auth-form">
       <input type="hidden" name="next" value={next} />
 
-      <div className="field">
-        <label htmlFor="email">אימייל</label>
-        <input type="email" id="email" name="email" autoComplete="username" required />
-      </div>
+      {state.error && <p className="form-error">{state.error}</p>}
 
-      <div className="field">
-        <label htmlFor="password">סיסמה</label>
+      <label className="fld">
+        <span>אימייל</span>
         <input
+          className="input"
+          type="email"
+          name="email"
+          autoComplete="username"
+          required
+        />
+      </label>
+
+      <label className="fld">
+        <span>סיסמה</span>
+        <input
+          className="input"
           type="password"
-          id="password"
           name="password"
           autoComplete="current-password"
           required
         />
-      </div>
-
-      {state.error && <p className="form-error">{state.error}</p>}
+      </label>
 
       <button type="submit" className="submit" disabled={pending}>
         {pending ? "מתחבר…" : "כניסה"}
