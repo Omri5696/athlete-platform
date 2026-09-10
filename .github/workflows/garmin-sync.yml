@@ -1,0 +1,43 @@
+name: Garmin sync
+
+on:
+  schedule:
+    - cron: "20 4 * * *" # ~07:20 Israel time, every day
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "How many days back to sync"
+        default: "3"
+        required: false
+
+concurrency:
+  group: garmin-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install -r sync/requirements.txt
+
+      - name: Restore Garmin token
+        uses: actions/cache@v4
+        with:
+          path: sync/.garmin
+          key: garmin-token-v1
+
+      - name: Run sync
+        env:
+          SUPABASE_URL: https://tbjtejhgzutjkfdulypb.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
+          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+          KESHEV_ATHLETE_ID: c90279cf-1910-42be-8243-822df753da98
+        run: python sync/sync.py --days "${{ github.event.inputs.days || 3 }}"
