@@ -833,6 +833,53 @@ select.input {
   font-weight: 450;
 }
 
+/* domain score bars */
+.domains {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+}
+.dbar-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  margin-bottom: 6px;
+}
+.dbar-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--raise);
+  overflow: hidden;
+}
+.dbar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--ink-3);
+}
+.dbar-fill.ready {
+  background: var(--ok);
+}
+.dbar-fill.watch {
+  background: var(--warn);
+}
+.dbar-fill.risk {
+  background: var(--bad);
+}
+.drivers {
+  font-size: 12.5px;
+  color: var(--ink);
+  margin: 14px 0 0;
+  line-height: 1.6;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
 /* ============================================================
    lists (tasks, questions, panels)
    ============================================================ */

@@ -2,13 +2,15 @@ import "server-only";
 import { createClient } from "./supabase/server";
 import { requireCoach } from "./auth";
 import type { Athlete, Checkin } from "./types";
-import type {
-  AthleteRow,
-  DailyCheckinRow,
-  DailyMetricRow,
+import {
+  metricRowToDay,
+  type AthleteRow,
+  type DailyCheckinRow,
+  type DailyMetricRow,
 } from "./supabase/db-types";
 
-const WINDOW_DAYS = 7;
+/** How much history to load for baselines. */
+const HISTORY_DAYS = 70;
 
 function checkinFromRow(row: DailyCheckinRow | undefined): Checkin {
   if (
@@ -30,34 +32,42 @@ function checkinFromRow(row: DailyCheckinRow | undefined): Checkin {
     stress: row.stress,
     ate: row.ate ?? "",
     note: row.note ?? "",
+    answers: row.answers ?? {},
   };
 }
 
-/** DB rows -> the `Athlete` shape the UI components already consume. */
 function assemble(
   row: AthleteRow,
   metrics: DailyMetricRow[],
   checkin: DailyCheckinRow | undefined,
 ): Athlete {
-  const recent = metrics.slice(-WINDOW_DAYS); // metrics arrive oldest-first
-  const num = (key: keyof DailyMetricRow) =>
-    recent.map((m) => Number(m[key] ?? 0));
-
   return {
     id: row.id,
     name: row.name,
     focus: row.focus,
-    hrv: num("hrv"),
-    rhr: num("rhr"),
-    sleepHours: num("sleep_hours"),
-    bodyBattery: num("body_battery"),
-    sleepScore: num("sleep_score"),
-    load: num("load"),
+    days: metrics.map(metricRowToDay), // oldest first
     checkin: checkinFromRow(checkin),
   };
 }
 
-/** All active athletes for the signed-in coach, with recent metrics + latest check-in. */
+function groupBy<T, K>(items: T[], key: (item: T) => K): Map<K, T[]> {
+  const map = new Map<K, T[]>();
+  for (const item of items) {
+    const k = key(item);
+    const b = map.get(k);
+    if (b) b.push(item);
+    else map.set(k, [item]);
+  }
+  return map;
+}
+
+const cutoff = (days: number) => {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() - days);
+  return d.toISOString().slice(0, 10);
+};
+
+/** All active athletes for the coach, each with `days` history + latest check-in. */
 export async function getRoster(): Promise<Athlete[]> {
   await requireCoach();
   const db = await createClient();
@@ -79,6 +89,7 @@ export async function getRoster(): Promise<Athlete[]> {
         .from("daily_metrics")
         .select("*")
         .in("athlete_id", ids)
+        .gte("metric_date", cutoff(HISTORY_DAYS))
         .order("metric_date")
         .returns<DailyMetricRow[]>(),
       db
@@ -111,7 +122,6 @@ export interface AthleteAdmin {
   hasCheckinToday: boolean;
 }
 
-/** Athlete list for the management screen. */
 export async function getManagedAthletes(): Promise<AthleteAdmin[]> {
   await requireCoach();
   const db = await createClient();
@@ -146,7 +156,6 @@ export async function getManagedAthletes(): Promise<AthleteAdmin[]> {
   }));
 }
 
-/** One athlete by id (own athletes only, enforced by RLS). */
 export async function getAthlete(id: string): Promise<Athlete | null> {
   await requireCoach();
   const db = await createClient();
@@ -165,6 +174,7 @@ export async function getAthlete(id: string): Promise<Athlete | null> {
         .from("daily_metrics")
         .select("*")
         .eq("athlete_id", id)
+        .gte("metric_date", cutoff(HISTORY_DAYS))
         .order("metric_date")
         .returns<DailyMetricRow[]>(),
       db
@@ -179,15 +189,4 @@ export async function getAthlete(id: string): Promise<Athlete | null> {
   if (cErr) throw cErr;
 
   return assemble(row, metrics ?? [], (checkins ?? [])[0]);
-}
-
-function groupBy<T, K>(items: T[], key: (item: T) => K): Map<K, T[]> {
-  const map = new Map<K, T[]>();
-  for (const item of items) {
-    const k = key(item);
-    const bucket = map.get(k);
-    if (bucket) bucket.push(item);
-    else map.set(k, [item]);
-  }
-  return map;
 }

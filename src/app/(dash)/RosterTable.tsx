@@ -1,19 +1,27 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { Athlete, Band } from "@/lib/types";
-import { band, bandLabel, delta, latest, readinessScore } from "@/lib/readiness";
+import type { Athlete, Band, MetricKey } from "@/lib/types";
+import { band, bandLabel, latest, metricDelta, readinessScore } from "@/lib/readiness";
 import { athleteFlags } from "@/lib/flags";
 
-function Cell({ value, series, opts }: {
-  value: string;
-  series: number[];
-  opts: Parameters<typeof delta>[1];
+function Cell({
+  days,
+  metric,
+  opts,
+  fmt,
+}: {
+  days: Athlete["days"];
+  metric: MetricKey;
+  opts?: Parameters<typeof metricDelta>[2];
+  fmt?: (n: number) => string;
 }) {
-  const d = delta(series, opts);
+  const v = latest(days, metric);
+  const d = metricDelta(days, metric, opts);
   return (
     <span className="mv">
-      {value}
+      {v == null ? "—" : fmt ? fmt(v) : v}
       {d.text !== "±0" && (
         <span className={`d ${d.direction}${d.bad ? " bad" : ""}`}>{d.text}</span>
       )}
@@ -43,6 +51,7 @@ export function RosterTable({
             <th className="n hide-sm">שינה</th>
             <th className="n hide-sm">HRV</th>
             <th className="n hide-sm">דופק</th>
+            <th className="n hide-sm">סטרס</th>
             <th>דגלים</th>
             <th className="n">מוכנוּת</th>
           </tr>
@@ -60,22 +69,25 @@ export function RosterTable({
                 tabIndex={0}
               >
                 <td>
-                  <span className="who">
+                  <Link href={`/athletes/${a.id}`} className="who" style={{ color: "inherit" }}>
                     <span className={`sdot ${b}`} />
                     <span>
                       <span className="nm" style={{ display: "block" }}>{a.name}</span>
                       <span className="fc">{a.focus || "—"}</span>
                     </span>
-                  </span>
+                  </Link>
                 </td>
                 <td className="n hide-sm">
-                  <Cell value={latest(a.sleepHours).toFixed(1)} series={a.sleepHours} opts={{ decimals: 1 }} />
+                  <Cell days={a.days} metric="sleepHours" opts={{ decimals: 1 }} fmt={(n) => n.toFixed(1)} />
                 </td>
                 <td className="n hide-sm">
-                  <Cell value={`${latest(a.hrv)}`} series={a.hrv} opts={{ pct: true }} />
+                  <Cell days={a.days} metric="hrv" opts={{ pct: true }} />
                 </td>
                 <td className="n hide-sm">
-                  <Cell value={`${latest(a.rhr)}`} series={a.rhr} opts={{ invert: true }} />
+                  <Cell days={a.days} metric="rhr" opts={{ invert: true }} />
+                </td>
+                <td className="n hide-sm">
+                  <Cell days={a.days} metric="stressAvg" opts={{ invert: true }} />
                 </td>
                 <td>
                   <span className="flags">

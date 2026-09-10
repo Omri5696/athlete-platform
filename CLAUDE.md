@@ -30,12 +30,16 @@
 
 ## מצב נוכחי
 
-Auth עובד (Supabase, email+password). הדשבורד (`/`), דף מתאמן (`/athletes/[id]`)
-וניהול מתאמנים (`/manage`) קוראים מ-DB דרך `src/lib/athletes.ts` (authed/RLS).
-`/checkin/[token]` הציבורי שומר צ׳ק-אין. seed: 10 מתאמנים, מאמן `omricohen5696@gmail.com`.
+Auth עובד (Supabase, email+password). כל המסכים בנויים; קוראים מ-DB (authed/RLS).
+`/checkin/[token]` הציבורי שומר צ׳ק-אין. seed: 10 מתאמנים + 56 ימי היסטוריית מדדים.
 
-הבא (מוסכם): (1) הזנת נתונים ידנית, (2) יומן מאמן לכל מתאמן. אחר כך: צ׳ק-אין אוטומטי
-במייל. ראה `docs/PLAN.md` / `docs/STRATEGY.md`. יש subagent `product-manager` להחלטות מוצר.
+**מנוע ניתוח** (`src/lib/analysis.ts`, שכבות 1–2 מ-`docs/ANALYSIS.md`): `Athlete`
+מכיל `days: DayMetrics[]`; בייסליינים אישיים, ציוני תחום (התאוששות/עומס/תחושה),
+`readinessScore` נבנה מהם. `flags.ts` = דפוסים רב-יומיים. `src/lib/demo-data.ts`
+= פרופיל + "story" לכל מתאמן, `scripts/seed.ts` מייצר ממנו את ההיסטוריה.
+
+הבא: יומן מאמן, ואז שכבות 3–4 מ-ANALYSIS.md (חוקי דפוסים + סקירת AI שבועית).
+ראה `docs/PLAN.md`, `docs/STRATEGY.md`, `docs/ANALYSIS.md`. subagent `product-manager` להחלטות מוצר.
 
 ## מפתחות וסביבה
 
