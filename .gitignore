@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# garmin sync — local only
+/sync/.env
+/sync/accounts.json
+/sync/.garmin/
+/sync/__pycache__/

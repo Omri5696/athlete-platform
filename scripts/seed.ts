@@ -143,6 +143,19 @@ async function ensureCoach(): Promise<string> {
 async function seed() {
   const coachId = await ensureCoach();
 
+  // safety: this wipes ALL of the coach's athletes. Don't run it over real data.
+  const { count } = await db
+    .from("athletes")
+    .select("id", { count: "exact", head: true })
+    .eq("coach_id", coachId);
+  if ((count ?? 0) > 0 && !process.argv.includes("--force")) {
+    console.error(
+      `Refusing to seed: coach already has ${count} athlete(s). ` +
+        `This script deletes them all. Re-run with --force if that's really what you want.`,
+    );
+    process.exit(1);
+  }
+
   const { error: delErr } = await db.from("athletes").delete().eq("coach_id", coachId);
   if (delErr) throw delErr;
 
