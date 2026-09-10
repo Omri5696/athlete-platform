@@ -1,99 +1,45 @@
 /* ============================================================
-   קשב — design system · v3
-   Bright, calm, modern. White canvas, hairline borders, almost no
-   shadow. One quiet indigo accent. Generous space. (Radix-derived.)
+   קשב — design system · v4
+   Light only. Simple, airy, futuristic. Almost no borders — separation
+   is space + the faintest shadow. One vivid indigo accent, used sparingly.
    ============================================================ */
 
 :root {
-  /* neutrals — Radix slate, light */
-  --bg: #fcfcfd;
-  --panel: #ffffff;
-  --raise: #f9f9fb;
-  --hover: #f1f1f4;
-  --line: #ececed;
-  --line-2: #e0e1e6;
+  color-scheme: light;
 
-  --ink: #1c2024;
-  --ink-2: #60646c;
-  --ink-3: #8b8d98;
+  --bg: #f7f8fa;        /* the page behind cards */
+  --panel: #ffffff;     /* cards, sidebar */
+  --raise: #f2f3f6;     /* inset fills (tracks, chips) */
+  --hover: #f4f5f8;
+  --line: #eef0f3;      /* barely-there hairline, used rarely */
+  --line-2: #e3e5ea;    /* inputs / stronger separators */
 
-  /* accent — Radix indigo */
-  --accent: #3e63dd;
-  --accent-hover: #3358d4;
-  --accent-ink: #3a5bc7;
-  --accent-wash: #f0f3ff;
-  --accent-line: #d9e1ff;
+  --ink: #14161c;
+  --ink-2: #585d68;
+  --ink-3: #9aa0ac;
+
+  --accent: #4f46e5;    /* indigo-600 — confident, modern */
+  --accent-hover: #4338ca;
+  --accent-ink: #4b45d6;
+  --accent-wash: #eef0ff;
+  --accent-line: #dee0ff;
   --on-accent: #ffffff;
 
-  /* status */
-  --ok: #218358;
-  --ok-wash: #e7f6ec;
-  --warn: #9a5c00;
-  --warn-wash: #fef2e3;
-  --bad: #ce2c31;
-  --bad-wash: #ffeceb;
+  --ok: #0e9d63;
+  --ok-wash: #e8f7f0;
+  --warn: #b0730c;
+  --warn-wash: #fdf3e3;
+  --bad: #d64545;
+  --bad-wash: #fdece9;
 
-  --shadow: 0 1px 2px rgba(20, 22, 28, 0.04);
-  --shadow-pop: 0 4px 16px -4px rgba(20, 22, 28, 0.1), 0 2px 6px -2px rgba(20, 22, 28, 0.06);
+  --shadow: 0 1px 2px rgba(16, 18, 26, 0.04), 0 1px 3px rgba(16, 18, 26, 0.03);
+  --shadow-pop: 0 8px 28px -8px rgba(16, 18, 26, 0.12), 0 4px 10px -4px rgba(16, 18, 26, 0.06);
 
-  --r-lg: 12px;
-  --r-md: 9px;
-  --r-sm: 7px;
+  --r-lg: 16px;
+  --r-md: 11px;
+  --r-sm: 8px;
 
-  --sidebar-w: 244px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0f1012;
-    --panel: #17181b;
-    --raise: #1c1d21;
-    --hover: #222429;
-    --line: #26282d;
-    --line-2: #34363c;
-    --ink: #ecedef;
-    --ink-2: #9ba0a9;
-    --ink-3: #6c707a;
-    --accent: #849dff;
-    --accent-hover: #9db2ff;
-    --accent-ink: #a3b5ff;
-    --accent-wash: #1a1f36;
-    --accent-line: #2c3358;
-    --on-accent: #0f1012;
-    --ok: #46c088;
-    --ok-wash: #102c1e;
-    --warn: #e0a350;
-    --warn-wash: #2a2010;
-    --bad: #ec6a63;
-    --bad-wash: #34181a;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-pop: 0 6px 20px -6px rgba(0, 0, 0, 0.5);
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0f1012;
-  --panel: #17181b;
-  --raise: #1c1d21;
-  --hover: #222429;
-  --line: #26282d;
-  --line-2: #34363c;
-  --ink: #ecedef;
-  --ink-2: #9ba0a9;
-  --ink-3: #6c707a;
-  --accent: #849dff;
-  --accent-hover: #9db2ff;
-  --accent-ink: #a3b5ff;
-  --accent-wash: #1a1f36;
-  --accent-line: #2c3358;
-  --on-accent: #0f1012;
-  --ok: #46c088;
-  --ok-wash: #102c1e;
-  --warn: #e0a350;
-  --warn-wash: #2a2010;
-  --bad: #ec6a63;
-  --bad-wash: #34181a;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-pop: 0 6px 20px -6px rgba(0, 0, 0, 0.5);
+  --sidebar-w: 240px;
 }
 
 * {
@@ -106,7 +52,7 @@ body {
   font-family: var(--font-ui), "IBM Plex Sans Hebrew", system-ui, -apple-system, sans-serif;
   font-size: 14.5px;
   font-weight: 400;
-  line-height: 1.55;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
 h1,
@@ -147,12 +93,11 @@ a:hover {
 }
 
 .sidebar {
-  background: var(--panel);
-  border-inline-start: 1px solid var(--line);
-  padding: 20px 12px;
+  background: var(--bg);
+  padding: 24px 14px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   position: sticky;
   top: 0;
   height: 100dvh;
@@ -162,7 +107,7 @@ a:hover {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 4px 10px 20px;
+  padding: 4px 12px 24px;
 }
 .sidebar .brand svg {
   color: var(--accent);
@@ -177,26 +122,27 @@ a:hover {
   display: flex;
   align-items: center;
   gap: 11px;
-  padding: 8px 11px;
-  border-radius: var(--r-md);
+  padding: 9px 12px;
+  border-radius: 10px;
   font-size: 13.5px;
   font-weight: 450;
   color: var(--ink-2);
-  transition: background 0.11s, color 0.11s;
+  transition: background 0.12s, color 0.12s;
 }
 .sidebar .navlink:hover {
-  background: var(--hover);
+  background: var(--panel);
   color: var(--ink);
   text-decoration: none;
 }
 .sidebar .navlink svg {
   flex-shrink: 0;
-  opacity: 0.7;
+  opacity: 0.65;
 }
 .sidebar .navlink[aria-current="page"] {
-  background: var(--accent-wash);
+  background: var(--panel);
   color: var(--accent-ink);
   font-weight: 550;
+  box-shadow: var(--shadow);
 }
 .sidebar .navlink[aria-current="page"] svg {
   opacity: 1;
@@ -207,8 +153,8 @@ a:hover {
 }
 .sidebar .foot {
   border-top: 1px solid var(--line);
-  padding-top: 10px;
-  margin-top: 10px;
+  padding-top: 12px;
+  margin-top: 12px;
 }
 .sidebar .foot .coach {
   font-size: 12px;
@@ -240,20 +186,21 @@ a:hover {
 
 .app-main {
   min-width: 0;
-  padding: 34px 40px 90px;
-  max-width: 1060px;
+  padding: 42px 48px 100px;
+  max-width: 1080px;
 }
 .page-head {
-  margin-bottom: 28px;
+  margin-bottom: 32px;
 }
 .page-head h1 {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
+  letter-spacing: -0.02em;
 }
 .page-head .sub {
-  font-size: 13px;
+  font-size: 13.5px;
   color: var(--ink-3);
-  margin-top: 5px;
+  margin-top: 6px;
 }
 
 @media (max-width: 900px) {
@@ -294,6 +241,10 @@ a:hover {
   .app-main {
     padding: 22px 18px 64px;
   }
+  .sidebar {
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+  }
 }
 
 /* ============================================================
@@ -301,26 +252,26 @@ a:hover {
    ============================================================ */
 .card {
   background: var(--panel);
-  border: 1px solid var(--line);
   border-radius: var(--r-lg);
-  padding: 20px 22px;
+  padding: 22px 24px;
+  box-shadow: var(--shadow);
 }
 .section-title {
-  font-size: 11.5px;
-  font-weight: 550;
-  letter-spacing: 0.03em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   color: var(--ink-3);
   text-transform: uppercase;
-  margin: 0 0 12px;
+  margin: 0 0 14px;
 }
 .empty {
   background: var(--panel);
-  border: 1px dashed var(--line-2);
   border-radius: var(--r-lg);
-  padding: 44px 24px;
+  padding: 52px 24px;
   text-align: center;
   color: var(--ink-2);
   font-size: 13.5px;
+  box-shadow: var(--shadow);
 }
 .muted {
   color: var(--ink-3);
@@ -473,9 +424,9 @@ select.input {
 }
 .stat {
   background: var(--panel);
-  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
   border-radius: var(--r-lg);
-  padding: 15px 17px;
+  padding: 18px 20px;
 }
 .stat .k {
   display: flex;
@@ -483,7 +434,7 @@ select.input {
   gap: 7px;
   font-size: 12px;
   color: var(--ink-2);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .stat .k::before {
   content: "";
@@ -516,7 +467,7 @@ select.input {
 
 .table-wrap {
   background: var(--panel);
-  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
   border-radius: var(--r-lg);
   overflow: hidden;
 }
@@ -526,14 +477,13 @@ select.input {
 }
 .rtable thead th {
   text-align: start;
-  font-size: 11px;
-  font-weight: 550;
-  letter-spacing: 0.03em;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
   color: var(--ink-3);
   text-transform: uppercase;
-  padding: 12px 14px;
+  padding: 15px 18px;
   border-bottom: 1px solid var(--line);
-  background: var(--raise);
 }
 .rtable thead th.n {
   text-align: end;
@@ -546,7 +496,7 @@ select.input {
   background: var(--hover);
 }
 .rtable tbody td {
-  padding: 13px 14px;
+  padding: 16px 18px;
   border-bottom: 1px solid var(--line);
   font-size: 13.5px;
   vertical-align: middle;
@@ -710,9 +660,9 @@ select.input {
 }
 .trend {
   background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg);
-  padding: 16px 17px;
+  box-shadow: var(--shadow);
+  border-radius: 14px;
+  padding: 18px 19px;
 }
 .trend .tl {
   font-size: 11.5px;
@@ -752,15 +702,15 @@ select.input {
 
 .panel {
   background: var(--panel);
-  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
   border-radius: var(--r-lg);
-  padding: 20px 22px;
-  margin-bottom: 14px;
+  padding: 22px 24px;
+  margin-bottom: 16px;
 }
 .panel h2 {
-  font-size: 11.5px;
-  font-weight: 550;
-  letter-spacing: 0.03em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ink-3);
   margin-bottom: 16px;
@@ -885,7 +835,7 @@ select.input {
    ============================================================ */
 .list {
   background: var(--panel);
-  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
   border-radius: var(--r-lg);
   overflow: hidden;
 }

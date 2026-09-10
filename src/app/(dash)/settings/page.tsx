@@ -21,12 +21,6 @@ export default async function SettingsPage() {
         amberAt={settings.readiness.amberAt}
       />
 
-      <div className="card" style={{ marginTop: 20 }}>
-        <p className="section-title">מצב תצוגה</p>
-        <p className="muted" style={{ fontSize: 13 }}>
-          קשב עוקב אחרי המצב הבהיר/כהה של המערכת ההפעלה. מצב ידני יתווסף בהמשך.
-        </p>
-      </div>
     </>
   );
 }
