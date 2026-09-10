@@ -45,7 +45,9 @@ def load_dotenv(path: Path) -> None:
         if not line or line.startswith("#") or "=" not in line:
             continue
         k, v = line.split("=", 1)
-        os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+        v = v.strip().strip('"').strip("'")
+        if v and not os.environ.get(k.strip()):
+            os.environ[k.strip()] = v
 
 
 load_dotenv(HERE / ".env")
